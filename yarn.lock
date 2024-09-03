@@ -1799,6 +1799,13 @@ acorn-jsx@^5.3.2:
 "acorn@^6.0.0 || ^7.0.0 || ^8.0.0", acorn@^8.8.2, acorn@^8.9.0:
   version "8.12.1"
 
+affine-hull@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/affine-hull/-/affine-hull-1.0.0.tgz"
+  integrity sha512-3QNG6+vFAwJvSZHsJYDJ/mt1Cxx9n5ffA+1Ohmj7udw0JuRgUVIXK0P9N9pCMuEdS3jCNt8GFX5q2fChq+GO3Q==
+  dependencies:
+    robust-orientation "^1.1.3"
+
 ajv@^6.12.4:
   version "6.12.6"
   dependencies:
@@ -2030,8 +2037,18 @@ babel-preset-jest@^29.6.3:
 balanced-match@^1.0.0:
   version "1.0.2"
 
+base-64@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/base-64/-/base-64-0.1.0.tgz"
+  integrity sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==
+
 base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
+
+bit-twiddle@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/bit-twiddle/-/bit-twiddle-1.0.2.tgz"
+  integrity sha512-B9UhK0DKFZhoTFcfvAzhqsjStvGJp9vYWf3+6SNTtdSQnvIgfkHbgHrg/e4+TH71N2GDu8tpmCVoyfrL1d7ntA==
 
 bl@^4.1.0:
   version "4.1.0"
@@ -2039,6 +2056,11 @@ bl@^4.1.0:
     buffer "^5.5.0"
     inherits "^2.0.4"
     readable-stream "^3.4.0"
+
+boolbase@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/boolbase/-/boolbase-1.0.0.tgz"
+  integrity sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -2286,6 +2308,15 @@ connect@^3.6.5:
 convert-source-map@^2.0.0:
   version "2.0.0"
 
+convex-hull@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/convex-hull/-/convex-hull-1.0.3.tgz"
+  integrity sha512-24rZAoh81t41GHPLAxcsokgjH9XNoVqU2OiSi8iMHUn6HUURfiefcEWAPt1AfwZjBBWTKadOm1xUcUMnfFukhQ==
+  dependencies:
+    affine-hull "^1.0.0"
+    incremental-convex-hull "^1.0.1"
+    monotone-convex-hull-2d "^1.0.1"
+
 core-js-compat@^3.37.1, core-js-compat@^3.38.0:
   version "3.38.1"
   dependencies:
@@ -2327,6 +2358,30 @@ cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
     which "^2.0.1"
+
+css-select@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/css-select/-/css-select-5.1.0.tgz"
+  integrity sha512-nwoRF1rvRRnnCqqY7updORDsuqKzqYJ28+oSMaJMMgOauh3fvwHqMS7EZpIPqK8GL+g9mKxF1vP/ZjSeNjEVHg==
+  dependencies:
+    boolbase "^1.0.0"
+    css-what "^6.1.0"
+    domhandler "^5.0.2"
+    domutils "^3.0.1"
+    nth-check "^2.0.1"
+
+css-tree@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.npmjs.org/css-tree/-/css-tree-1.1.3.tgz"
+  integrity sha512-tRpdppF7TRazZrjJ6v3stzv93qxRcSsFmW6cX0Zm2NVKpxE1WV1HblnghVv9TreireHkqI/VDEsfolRF1p6y7Q==
+  dependencies:
+    mdn-data "2.0.14"
+    source-map "^0.6.1"
+
+css-what@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.npmjs.org/css-what/-/css-what-6.1.0.tgz"
+  integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
 csstype@^3.0.2:
   version "3.1.3"
@@ -2441,6 +2496,41 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
+dom-serializer@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/dom-serializer/-/dom-serializer-2.0.0.tgz"
+  integrity sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==
+  dependencies:
+    domelementtype "^2.3.0"
+    domhandler "^5.0.2"
+    entities "^4.2.0"
+
+domelementtype@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/domelementtype/-/domelementtype-2.3.0.tgz"
+  integrity sha512-OLETBj6w0OsagBwdXnPdN0cnMfF9opN69co+7ZrbfPGrdpPVNBUj02spi6B1N7wChLQiPn4CSH/zJvXw56gmHw==
+
+domhandler@^5.0.2, domhandler@^5.0.3:
+  version "5.0.3"
+  resolved "https://registry.npmjs.org/domhandler/-/domhandler-5.0.3.tgz"
+  integrity sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==
+  dependencies:
+    domelementtype "^2.3.0"
+
+domutils@^3.0.1:
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/domutils/-/domutils-3.1.0.tgz"
+  integrity sha512-H78uMmQtI2AhgDJjWeQmHwJJ2bLPD3GMmO7Zja/ZZh84wkm+4ut+IUnUdRa8uCGX88DiVx1j6FRe1XfxEgjEZA==
+  dependencies:
+    dom-serializer "^2.0.0"
+    domelementtype "^2.3.0"
+    domhandler "^5.0.3"
+
+earcut@^2.0.0:
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/earcut/-/earcut-2.2.4.tgz"
+  integrity sha512-/pjZsA1b4RPHbeWZQn66SWS8nZZWLQQ23oE3Eam7aroEFGEvwKAsJfZ9ytiEMycfzXWpca4FA9QIOehf7PocBQ==
+
 ee-first@1.1.1:
   version "1.1.1"
 
@@ -2460,6 +2550,11 @@ encoding@^0.1.0:
   version "0.1.13"
   dependencies:
     iconv-lite "^0.6.2"
+
+entities@^4.2.0:
+  version "4.5.0"
+  resolved "https://registry.npmjs.org/entities/-/entities-4.5.0.tgz"
+  integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
 
 env-paths@^2.2.1:
   version "2.2.1"
@@ -2917,6 +3012,23 @@ functions-have-names@^1.2.3:
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
 
+geojson-area@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/geojson-area/-/geojson-area-0.2.1.tgz"
+  integrity sha512-I+cht30/CFFObh8GgEa/1o9Kd7RwQTHmotYp3ToyCpxxDFNcuX5SlErKkvoy3otnrsWzODN8yscSTGOAkQ3tKQ==
+  dependencies:
+    wgs84 "0.0.0"
+
+geojson-normalize@0.0.0:
+  version "0.0.0"
+  resolved "https://registry.npmjs.org/geojson-normalize/-/geojson-normalize-0.0.0.tgz"
+  integrity sha512-h/ldgc7C2DrYDIn+F/o+AgZLxmeC+O4q3wvGwiuBjTTRnhxvxaGz6cE6cRTeMH89jIJM3BiP+R6Yiht7f3PBuA==
+
+geojson-random@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.npmjs.org/geojson-random/-/geojson-random-0.2.2.tgz"
+  integrity sha512-/vZQ14mjKPG3LJ7bpyXsJ0aoz8NzvwpwwP//uBgbzIu2BCFd4uRagp1QvY3RAzRQsHOHyVh33dbYUYws7vOCkg==
+
 get-caller-file@^2.0.1, get-caller-file@^2.0.5:
   version "2.0.5"
 
@@ -3101,6 +3213,14 @@ import-local@^3.0.2:
 
 imurmurhash@^0.1.4:
   version "0.1.4"
+
+incremental-convex-hull@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/incremental-convex-hull/-/incremental-convex-hull-1.0.1.tgz"
+  integrity sha512-mKRJDXtzo1R9LxCuB1TdwZXHaPaIEldoGPsXy2jrJc/kufyqp8y/VAQQxThSxM2aroLoh6uObexPk1ASJ7FB7Q==
+  dependencies:
+    robust-orientation "^1.1.2"
+    simplicial-complex "^1.0.0"
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -3735,6 +3855,11 @@ jsonfile@^4.0.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
+jsts@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/jsts/-/jsts-1.1.2.tgz"
+  integrity sha512-4qWAI9gR72HcGWCl7bej9/2dCM6Nv6dh5Zn1G+wzJYW9wsFL/2bPA3kdR8IAPObmF4gb56l5EGlXxErmB+9GOw==
+
 "jsx-ast-utils@^2.4.1 || ^3.0.0":
   version "3.3.5"
   dependencies:
@@ -3797,7 +3922,7 @@ lodash.merge@^4.6.2:
 lodash.throttle@^4.1.1:
   version "4.1.1"
 
-lodash@^4.17.21:
+lodash@^4.17.13, lodash@^4.17.21:
   version "4.17.21"
 
 log-symbols@^4.1.0:
@@ -3841,6 +3966,11 @@ makeerror@1.0.12:
 
 marky@^1.2.2:
   version "1.2.5"
+
+mdn-data@2.0.14:
+  version "2.0.14"
+  resolved "https://registry.npmjs.org/mdn-data/-/mdn-data-2.0.14.tgz"
+  integrity sha512-dn6wd0uw5GsdswPFfsgMp5NSB0/aDe6fK94YJV/AJDYXL6HVLWBsxeq7js7Ad+mU2K9LAlwpk6kN2D5mwCPVow==
 
 memoize-one@^5.0.0:
   version "5.2.1"
@@ -4058,7 +4188,7 @@ minimatch@^9.0.4:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimist@^1.2.6:
+minimist@^1.1.0, minimist@^1.2.6:
   version "1.2.8"
 
 mkdirp@^0.5.1:
@@ -4068,6 +4198,13 @@ mkdirp@^0.5.1:
 
 mkdirp@^1.0.4:
   version "1.0.4"
+
+monotone-convex-hull-2d@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/monotone-convex-hull-2d/-/monotone-convex-hull-2d-1.0.1.tgz"
+  integrity sha512-ixQ3qdXTVHvR7eAoOjKY8kGxl9YjOFtzi7qOjwmFFPfBqZHVOjUFOBy/Dk9dusamRSPJe9ggyfSypRbs0Bl8BA==
+  dependencies:
+    robust-orientation "^1.1.3"
 
 ms@2.0.0:
   version "2.0.0"
@@ -4127,6 +4264,13 @@ npm-run-path@^4.0.1:
   version "4.0.1"
   dependencies:
     path-key "^3.0.0"
+
+nth-check@^2.0.1:
+  version "2.1.1"
+  resolved "https://registry.npmjs.org/nth-check/-/nth-check-2.1.1.tgz"
+  integrity sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==
+  dependencies:
+    boolbase "^1.0.0"
 
 nullthrows@^1.1.1:
   version "1.1.1"
@@ -4305,6 +4449,11 @@ path-parse@^1.0.7:
 path-type@^4.0.0:
   version "4.0.0"
 
+paths-js@^0.4.10:
+  version "0.4.11"
+  resolved "https://registry.npmjs.org/paths-js/-/paths-js-0.4.11.tgz"
+  integrity sha512-3mqcLomDBXOo7Fo+UlaenG6f71bk1ZezPQy2JCmYHy2W2k5VKpP+Jbin9H0bjXynelTbglCqdFhSEkeIkKTYUA==
+
 picocolors@^1.0.0, picocolors@^1.0.1:
   version "1.0.1"
 
@@ -4335,6 +4484,11 @@ plist@^3.1.0:
     "@xmldom/xmldom" "^0.8.8"
     base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
+
+point-in-polygon@^1.0.1:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/point-in-polygon/-/point-in-polygon-1.1.0.tgz"
+  integrity sha512-3ojrFwjnnw8Q9242TzgXuTD+eKiutbzyslcq1ydfu82Db2y+Ogbmyrkpv0Hgj31qwT3lbS9+QAAO/pIQM35XRw==
 
 possible-typed-array-names@^1.0.0:
   version "1.0.0"
@@ -4449,6 +4603,23 @@ react-is@^16.7.0:
 react-is@^17.0.1:
   version "17.0.2"
 
+react-native-chart-kit@^6.12.0:
+  version "6.12.0"
+  resolved "https://registry.npmjs.org/react-native-chart-kit/-/react-native-chart-kit-6.12.0.tgz"
+  integrity sha512-nZLGyCFzZ7zmX0KjYeeSV1HKuPhl1wOMlTAqa0JhlyW62qV/1ZPXHgT8o9s8mkFaGxdqbspOeuaa6I9jUQDgnA==
+  dependencies:
+    lodash "^4.17.13"
+    paths-js "^0.4.10"
+    point-in-polygon "^1.0.1"
+
+react-native-fs@^2.20.0:
+  version "2.20.0"
+  resolved "https://registry.npmjs.org/react-native-fs/-/react-native-fs-2.20.0.tgz"
+  integrity sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ==
+  dependencies:
+    base-64 "^0.1.0"
+    utf8 "^3.0.0"
+
 react-native-gesture-handler@^2.18.1, "react-native-gesture-handler@>= 1.0.0":
   version "2.18.1"
   resolved "https://registry.npmjs.org/react-native-gesture-handler/-/react-native-gesture-handler-2.18.1.tgz"
@@ -4458,6 +4629,11 @@ react-native-gesture-handler@^2.18.1, "react-native-gesture-handler@>= 1.0.0":
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
     prop-types "^15.7.2"
+
+react-native-google-maps@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/react-native-google-maps/-/react-native-google-maps-1.0.0.tgz"
+  integrity sha512-EbvyzGhlhXRHNxruGE1BwwjzlLUwQNxnkHRFF4qa+4AVnCe25hOHghxT2b1AJH7dMBVE84bmTTlm/IWAc43jMA==
 
 react-native-maps@^1.18.0:
   version "1.18.0"
@@ -4479,6 +4655,15 @@ react-native-screens@^3.34.0, "react-native-screens@>= 3.0.0":
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-svg@^15.6.0, "react-native-svg@> 6.4.1":
+  version "15.6.0"
+  resolved "https://registry.npmjs.org/react-native-svg/-/react-native-svg-15.6.0.tgz"
+  integrity sha512-TUtR+h+yi1ODsd8FHdom1TpjfWOmnaK5pri5rnSBXnMqpzq8o2zZfonHTjPX+nS3wb/Pu2XsoARgYaHNjVWXhQ==
+  dependencies:
+    css-select "^5.1.0"
+    css-tree "^1.1.3"
+    warn-once "0.1.1"
+
 react-native-vector-icons@^10.1.0:
   version "10.1.0"
   resolved "https://registry.npmjs.org/react-native-vector-icons/-/react-native-vector-icons-10.1.0.tgz"
@@ -4487,7 +4672,7 @@ react-native-vector-icons@^10.1.0:
     prop-types "^15.7.2"
     yargs "^16.1.1"
 
-react-native@*, "react-native@>= 0.64.3", react-native@0.75.2:
+react-native@*, "react-native@>= 0.50.0", "react-native@>= 0.64.3", react-native@0.75.2:
   version "0.75.2"
   dependencies:
     "@jest/create-cache-key-function" "^29.6.3"
@@ -4545,7 +4730,7 @@ react-test-renderer@18.3.1:
     react-shallow-renderer "^16.15.0"
     scheduler "^0.23.2"
 
-react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", react@^18.2.0, react@^18.3.1, "react@>= 17.0.1", react@>=16.8, react@>=17.0.0, react@18.3.1:
+react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", react@^18.2.0, react@^18.3.1, "react@> 16.7.0", "react@>= 17.0.1", react@>=16.8, react@>=17.0.0, react@18.3.1:
   version "18.3.1"
   dependencies:
     loose-envify "^1.1.0"
@@ -4687,6 +4872,34 @@ rimraf@~2.6.2:
   version "2.6.3"
   dependencies:
     glob "^7.1.3"
+
+robust-orientation@^1.1.2, robust-orientation@^1.1.3:
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/robust-orientation/-/robust-orientation-1.2.1.tgz"
+  integrity sha512-FuTptgKwY6iNuU15nrIJDLjXzCChWB+T4AvksRtwPS/WZ3HuP1CElCm1t+OBfgQKfWbtZIawip+61k7+buRKAg==
+  dependencies:
+    robust-scale "^1.0.2"
+    robust-subtract "^1.0.0"
+    robust-sum "^1.0.0"
+    two-product "^1.0.2"
+
+robust-scale@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/robust-scale/-/robust-scale-1.0.2.tgz"
+  integrity sha512-jBR91a/vomMAzazwpsPTPeuTPPmWBacwA+WYGNKcRGSh6xweuQ2ZbjRZ4v792/bZOhRKXRiQH0F48AvuajY0tQ==
+  dependencies:
+    two-product "^1.0.2"
+    two-sum "^1.0.0"
+
+robust-subtract@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/robust-subtract/-/robust-subtract-1.0.0.tgz"
+  integrity sha512-xhKUno+Rl+trmxAIVwjQMiVdpF5llxytozXJOdoT4eTIqmqsndQqFb1A0oiW3sZGlhMRhOi6pAD4MF1YYW6o/A==
+
+robust-sum@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/robust-sum/-/robust-sum-1.0.0.tgz"
+  integrity sha512-AvLExwpaqUqD1uwLU6MwzzfRdaI6VEZsyvQ3IAQ0ZJ08v1H+DTyqskrf2ZJyh0BDduFVLN7H04Zmc+qTiahhAw==
 
 run-parallel@^1.1.9:
   version "1.2.0"
@@ -4830,6 +5043,19 @@ simple-swizzle@^0.2.2:
   integrity sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==
   dependencies:
     is-arrayish "^0.3.1"
+
+simplicial-complex@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/simplicial-complex/-/simplicial-complex-1.0.0.tgz"
+  integrity sha512-mHauIKSOy3GquM5VnYEiu7eP5y4A8BiaN9ezUUgyYFz1k68PqDYcyaH3kenp2cyvWZE96QKE3nrxYw65Allqiw==
+  dependencies:
+    bit-twiddle "^1.0.0"
+    union-find "^1.0.0"
+
+simplify-js@^1.2.1:
+  version "1.2.4"
+  resolved "https://registry.npmjs.org/simplify-js/-/simplify-js-1.2.4.tgz"
+  integrity sha512-vITfSlwt7h/oyrU42R83mtzFpwYk3+mkH9bOHqq/Qw6n8rtR7aE3NZQ5fbcyCUVVmuMJR6ynsAhOfK2qoah8Jg==
 
 sisteransi@^1.0.5:
   version "1.0.5"
@@ -5075,6 +5301,450 @@ tsutils@^3.21.0:
   dependencies:
     tslib "^1.8.1"
 
+turf-along@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-along/-/turf-along-3.0.12.tgz"
+  integrity sha512-9wHa3LiqsdEExCuPgw8O5fJzqeL4lf8srBBfjGid2Tjh2nwuqgkcFZxzbnLE0Y8oFh60iNJUdccGuJSTJ3YGyg==
+  dependencies:
+    turf-bearing "^3.0.12"
+    turf-destination "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-area@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-area/-/turf-area-3.0.12.tgz"
+  integrity sha512-62Rc1UD8b1yv+AkfhjQ6LSvzxnuJi+jj6q4EkginZxPMJh8HACyQkeNy6VI9WucUULXzoPs8IqeqNwltpMpZVw==
+  dependencies:
+    geojson-area "^0.2.1"
+
+turf-bbox-polygon@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-bbox-polygon/-/turf-bbox-polygon-3.0.12.tgz"
+  integrity sha512-9wuTI5eFBBe0bXNK8c5wk/zHbSne28KmUQVX66QhTRvUc34v+NUIzn4bzi3rZXpJvLSLyPVltPnYfn+YsuCkAQ==
+  dependencies:
+    turf-helpers "^3.0.12"
+
+turf-bbox@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-bbox/-/turf-bbox-3.0.12.tgz"
+  integrity sha512-ztNkTvRQ3ezArAQB2ZLLtJur9BiuWkwVv5u+aviC+3y0/mU5ITuoArOTUs4kLU+gNOjdpPwD0Ea/gqBR0lh2hw==
+  dependencies:
+    turf-meta "^3.0.12"
+
+turf-bearing@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-bearing/-/turf-bearing-3.0.12.tgz"
+  integrity sha512-oWAFtgpQwR78xWZn53BzdwHhd4uT5OtuvwEgzFkZWSa6kp+UpdJ39lDAcvdR0H8dCszuGB4KguaGCZLG+iyUvg==
+  dependencies:
+    turf-invariant "^3.0.12"
+
+turf-bezier@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-bezier/-/turf-bezier-3.0.12.tgz"
+  integrity sha512-8B4frrRtir9VJ6DTgGG5e81f7faPBnxTR2uJzWGd3bQkUaOBBX7rLQTBTBv1iFZVTU07QnWYgznm3c06FrtX2w==
+  dependencies:
+    turf-helpers "^3.0.12"
+
+turf-buffer@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-buffer/-/turf-buffer-3.0.12.tgz"
+  integrity sha512-2wy66sAd0EXX13ql2KeA1bFOtecqDCWmaayLueEaM7HOxY6i/VvroDIHZrFzuwPAa/4ZwMZPaTPiFQ6kh7VSGw==
+  dependencies:
+    geojson-normalize "0.0.0"
+    jsts "1.1.2"
+    turf-combine "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-center@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-center/-/turf-center-3.0.12.tgz"
+  integrity sha512-H2okrDla22kawwXsPvazV09mHr26/51sKONL52HTBeqiD2sK0WWRQkpdLfJdia0FT47wVk9mBiLXsKeIzDUi7Q==
+  dependencies:
+    turf-bbox "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-centroid@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-centroid/-/turf-centroid-3.0.12.tgz"
+  integrity sha512-OuH8ZZjnxiNETZ8vZkb+dC6C+fit+LdRBolLGDQzBKDLXV2z1nQX2+w/qTNKV9XP5ZZLeEpJPmP0z1MDSz+YRA==
+  dependencies:
+    turf-helpers "^3.0.12"
+    turf-meta "^3.0.12"
+
+turf-circle@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-circle/-/turf-circle-3.0.12.tgz"
+  integrity sha512-dOGg9yQXA21SpgI1qjU+Kgq0esvBU+ZTqoM5A2fWmoa0458YUoB85hnbxFtnmsFB3qXDsrW9RBuC4kyNCcn9KQ==
+  dependencies:
+    turf-destination "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-collect@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-collect/-/turf-collect-3.0.12.tgz"
+  integrity sha512-V36Hz03VmMXn0BUAZNY+w1bpCX6Ks2JzfvHdiWHh5MccziroaKOfOeC1odJcXSDrhoR14/0oSC4tHDKJslbcPA==
+  dependencies:
+    turf-inside "^3.0.12"
+
+turf-combine@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-combine/-/turf-combine-3.0.12.tgz"
+  integrity sha512-j99I2ydmO4AzQQqzh+DBbxRr+a//DNbXJFcvBSy88G7vlKByPzr0ONVDNcvS/a1JRTl11C2vfrWxRtHwwmzzDg==
+  dependencies:
+    turf-meta "^3.0.12"
+
+turf-concave@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-concave/-/turf-concave-3.0.12.tgz"
+  integrity sha512-0KQfAk1f7TRUtuNbIDsRcbi4ONMhtrQg0Y/uY/QM5wVIKMj5T5ZuSApqEfs4cDXcfWu//hwe2bgHJzu1GlUn4w==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-meta "^3.0.12"
+    turf-tin "^3.0.12"
+    turf-union "^3.0.12"
+
+turf-convex@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-convex/-/turf-convex-3.0.12.tgz"
+  integrity sha512-xfwhxDQKygFsdbEK8503/N+B4JZZB6i58lE39DTMcf97xCCLyv7zxGlalsKU4j+qywV3nbO6yhKHScv4t6t5bg==
+  dependencies:
+    convex-hull "^1.0.3"
+    turf-helpers "^3.0.12"
+    turf-meta "^3.0.12"
+
+turf-destination@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-destination/-/turf-destination-3.0.12.tgz"
+  integrity sha512-nXKJfH5qv+eoNbw5ggLZNsUokgmaHnGD8Woauc8+7C36JRPSEm1Y3wcjAdJX0VadJJdL8AjNP65QOiWOLdVe1Q==
+  dependencies:
+    turf-helpers "^3.0.12"
+    turf-invariant "^3.0.12"
+
+turf-difference@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-difference/-/turf-difference-3.0.12.tgz"
+  integrity sha512-YRMUspic52qdwZZxuVp0LB2QG39q4Ps5ZTfZq+QIGsqdKK7FxvbJTxsb/a+n4xHe/K4zCcWo/AXUw1pOFLrNbA==
+  dependencies:
+    jsts "1.1.2"
+    turf-helpers "^3.0.12"
+
+turf-distance@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-distance/-/turf-distance-3.0.12.tgz"
+  integrity sha512-dy2TguSbcCKJK7ZPwCZuG9+mK2DBKZ4g0wlmbKa7iGPFG18X1nPWJRzUkmNF3kdUe9K6+7SViTnbH6xQYCNpiw==
+  dependencies:
+    turf-helpers "^3.0.12"
+    turf-invariant "^3.0.12"
+
+turf-envelope@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-envelope/-/turf-envelope-3.0.12.tgz"
+  integrity sha512-2ahLojIP000MUhk7JC/ILASwiP074sFD5nc1HTYyHRhqkb8ukwFMHrR3haEmQdf7sJE3nexBELY9PMGyTQmBiQ==
+  dependencies:
+    turf-bbox "^3.0.12"
+    turf-bbox-polygon "^3.0.12"
+
+turf-explode@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-explode/-/turf-explode-3.0.12.tgz"
+  integrity sha512-cBUdQl2RBbu5YdL+mBNOcou8OlHLF6F9s6Rwz4EuOOGG0Urs0NE2CmascINB1+TgbxJozb29ZKNXezgwhwnrpg==
+  dependencies:
+    turf-helpers "^3.0.12"
+    turf-meta "^3.0.12"
+
+turf-flip@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-flip/-/turf-flip-3.0.12.tgz"
+  integrity sha512-SV/DI8I/dczRlqBMcAZyyQq1rlkrFZigFUKhtDIBqEJJvqKy70kDxbHrAkJdeAZ20caflkaTV2K40x4UTUpNgg==
+  dependencies:
+    turf-meta "^3.0.12"
+
+turf-grid@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/turf-grid/-/turf-grid-1.0.1.tgz"
+  integrity sha512-T2jHZ2HOgvkZZQjMmtl9lexeY6Xk1POF6wbYE7aYLjBO43MQqYNEFDf3JQ1gJymrYEaNy7yDSDYDyiYSsK6sQw==
+  dependencies:
+    turf-point "^2.0.0"
+
+turf-helpers@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-helpers/-/turf-helpers-3.0.12.tgz"
+  integrity sha512-e0Oic1RVdTq3PAd5XlPgdtE3eZlN4kSd+Sr4iwayeeBRCMns60j9t6helyHxvbjLLy1uP28IiNfnm30BF+YThw==
+
+turf-hex-grid@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-hex-grid/-/turf-hex-grid-3.0.12.tgz"
+  integrity sha512-3O580ujUHbAEi8vk38uyxvIQN3yjyeQEJtJppB2sYO7zcNORIcao68DlXQW29nSy1pUAYCbNkghDcumNL3A58A==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-inside@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-inside/-/turf-inside-3.0.12.tgz"
+  integrity sha512-QjRDeSgDwf1hIEATsYgbYMB1GnnfwEqjapskOIojICeUBfKA+NMExjaBtMc2V1SY5jNqja6tVPH+ek0d+WO7Vg==
+  dependencies:
+    turf-invariant "^3.0.12"
+
+turf-intersect@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-intersect/-/turf-intersect-3.0.12.tgz"
+  integrity sha512-eXDksaYFakN6BFcfiyqgH1PDizfkfhPUU2Axd+I5zjVEHgECplK+z8LYA/RqvQ59aWQ2MfNRqxwW12T07c4gMw==
+  dependencies:
+    jsts "1.1.2"
+
+turf-invariant@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-invariant/-/turf-invariant-3.0.12.tgz"
+  integrity sha512-6BAyAupdij6X8gTlpGHCG/zpqXXaTi7kjMAbQrepTpnPhIEQJtlGsiZCQu4EckCZS5Rzj5/b8Xw4gaxNpadihw==
+
+turf-isolines@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-isolines/-/turf-isolines-3.0.12.tgz"
+  integrity sha512-b4TY6fKYWvToxiYjYTiURUlljls8jG1oKFaBulu5pz0q6rxmpxkCGOA8t9AXQkNXzHBrDE+vjXashMtYEN9Tsw==
+  dependencies:
+    turf-bbox "^3.0.12"
+    turf-grid "1.0.1"
+    turf-helpers "^3.0.12"
+    turf-inside "^3.0.12"
+    turf-planepoint "^3.0.12"
+    turf-square "^3.0.12"
+    turf-tin "^3.0.12"
+
+turf-kinks@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-kinks/-/turf-kinks-3.0.12.tgz"
+  integrity sha512-gzLqDKPqq9rSWIPy6NDZMspDqk1wvP1sg+jaSqdKnW3mPTDn32IbHLxihjGzZoaW0YlIZmnrZlVBLqId6kCZ5w==
+  dependencies:
+    turf-helpers "^3.0.12"
+
+turf-line-distance@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-line-distance/-/turf-line-distance-3.0.12.tgz"
+  integrity sha512-HzrxOEKdUgl1vdqIBLmaA99B0cg3+41kamQ650wn26BFUdMrrtkt+x2FT3Y7DifYTNljQ2fblbylqtMAAS0jag==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-line-slice@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-line-slice/-/turf-line-slice-3.0.12.tgz"
+  integrity sha512-1ecV3DCTRkv2azoaN/ZFcKxLBrw3l4SRSP/dVAk1Gwn83vBYJ9XtjmUiMLE2WbzTzuzuDxLb6fMvyGyteXBUeg==
+  dependencies:
+    turf-bearing "^3.0.12"
+    turf-destination "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+    turf-point-on-line "^3.0.12"
+
+turf-meta@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-meta/-/turf-meta-3.0.12.tgz"
+  integrity sha512-B3YSKMpWGx1WYE8IM62pzOA0kqjrGjd/ZkSyrD5WXnrrpPfAUl0yBoZCJYL5IQcOwLqfd5xZt3HJnNH9cFiG7A==
+
+turf-midpoint@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-midpoint/-/turf-midpoint-3.0.12.tgz"
+  integrity sha512-Q1fZWQzc4SSF09hY+tJvgnDGBmVqTgBkIzOg0I0hy+ti0b9bSJ5P3+KY6wkVcC+zgDa8jzp8GZETijAV4WUAqw==
+  dependencies:
+    turf-bearing "^3.0.12"
+    turf-destination "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-invariant "^3.0.12"
+
+turf-nearest@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-nearest/-/turf-nearest-3.0.12.tgz"
+  integrity sha512-4jyHgtpxVSM2LXh+lz4z47lketEXMKlcIpCJplHFpT1ZddIUoKvT6RJDhTUN8a+mohE8HAPgvcUA53vmjxxNEg==
+  dependencies:
+    turf-distance "^3.0.12"
+
+turf-planepoint@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-planepoint/-/turf-planepoint-3.0.12.tgz"
+  integrity sha512-2okyqSAjC00QWEyr1vi04Vgug6OaYfBRtvtzHs16IxBN5xhAuwtCnUICb/1ugbOgCiBFV6TzIle/vA0EUVuRxQ==
+
+turf-point-grid@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-point-grid/-/turf-point-grid-3.0.12.tgz"
+  integrity sha512-5keUPz8j0VWilANaX3bP1evAm/u1u8v10HfUjtoenvWAC5dTGMUVCskgFqX9XitwmsPtaFiCuakM8s3HQzydSQ==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-point-on-line@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-point-on-line/-/turf-point-on-line-3.0.12.tgz"
+  integrity sha512-0+gqSE3pK//ylzQZoc+tLpLUa1/14vvqbMvteFu2bl9NP6oudzZqTWoY9dBfyD9rLQtFOCf/IdkIk+IIwTn1cg==
+  dependencies:
+    turf-bearing "^3.0.12"
+    turf-destination "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-point-on-surface@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-point-on-surface/-/turf-point-on-surface-3.0.12.tgz"
+  integrity sha512-8/CXalHx672E2gR5FIZlazrx2Gj8HJW9JHb7UF/SH2CGDt/DUQKynz3/rn2fj4PyGtXGG7JoS/XuBwEdH99gAw==
+  dependencies:
+    turf-center "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-explode "^3.0.12"
+    turf-helpers "^3.0.12"
+    turf-inside "^3.0.12"
+
+turf-point@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/turf-point/-/turf-point-2.0.1.tgz"
+  integrity sha512-DkzYiE8Gc7G6XNW3FsBEwKAMz7jVZ/cw+PqLLkiSR1bde0vRZumF26UDQrspyQNih/oShQ0i4mSfa/dw3tqzsA==
+  dependencies:
+    minimist "^1.1.0"
+
+turf-random@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-random/-/turf-random-3.0.12.tgz"
+  integrity sha512-y0bRhHUfTQJBdEigLpS0+y8ReagylBlAgSKhCanMkw2WtQBj4y5MNOT+dgwX6iOCiWrzCsgPvDm/2hRxdYzmTQ==
+  dependencies:
+    geojson-random "^0.2.2"
+
+turf-sample@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-sample/-/turf-sample-3.0.12.tgz"
+  integrity sha512-aDwiE4kjSHt60hYdIhCFQp7xTauIPUVufbfJSVR2+Xrq6KdK8IPIkUAjDKNIo7iSetEsK9uHNHCFTTvW1emGMQ==
+  dependencies:
+    turf-helpers "^3.0.12"
+
+turf-simplify@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-simplify/-/turf-simplify-3.0.12.tgz"
+  integrity sha512-g+kLtFhZaQD+OZwcl2KZ8RVWGQdsCJBT3/ZQiP6K8RYdD3d3QbruKIQdLgEZhK0lL0/EUCgzQz3/mhpxTA3RMw==
+  dependencies:
+    simplify-js "^1.2.1"
+
+turf-square-grid@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-square-grid/-/turf-square-grid-3.0.12.tgz"
+  integrity sha512-L8Bd3/YNYMqIYqWJDmGMJ7itSO7VMrbU1Vubt1f+GOHGnNcf789YXe1poNa6VdONw7spuRlgbQA94VMI5vzZUQ==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-square@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-square/-/turf-square-3.0.12.tgz"
+  integrity sha512-jBxMU+9ZO8WAEwFBC2AsBpwV/vmqdBFn73ONEYDb8n+LiOAMbwsDM+75pxg6kt5l3ugQJGbgfxVucVl3SUTJaQ==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-tag@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-tag/-/turf-tag-3.0.12.tgz"
+  integrity sha512-tNC7FkAMdFjePrqZqjrxE5IXGdkrZcBjWbRmCSwy0DMKhLgPuXfWNACXt4FFC5dgQ3jc3NbDvfsML6gs1es1zA==
+  dependencies:
+    turf-inside "^3.0.12"
+
+turf-tesselate@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-tesselate/-/turf-tesselate-3.0.12.tgz"
+  integrity sha512-LWalgrdZGqXoqxkqlD/uV7xpIbuhNJviLw1ANdiST6F6laz8qoi8C2hfHIyzcQB7T/0LeWsuWzHtJ1MotYhpuA==
+  dependencies:
+    earcut "^2.0.0"
+    turf-helpers "^3.0.12"
+
+turf-tin@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-tin/-/turf-tin-3.0.12.tgz"
+  integrity sha512-uqadTFrAE3pdVzAQN5CMGzZZtZMrirjRYL2iJRaHAXy9lDaVT+TlDe9gt+8SIwiPI1hVHq9NHHrEn6Cyn+xXxg==
+  dependencies:
+    turf-helpers "^3.0.12"
+
+turf-triangle-grid@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-triangle-grid/-/turf-triangle-grid-3.0.12.tgz"
+  integrity sha512-hL17vUzp85YoQeqRs4zIKEZloLGt8DWie39j2EK1S8I030L2A60aznZzagnxgo2JnReS25tDSRA4JdrorrECOw==
+  dependencies:
+    turf-distance "^3.0.12"
+    turf-helpers "^3.0.12"
+
+turf-union@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-union/-/turf-union-3.0.12.tgz"
+  integrity sha512-9R3/SccBa6Qpqn1CYUU1n7gv1E1f+pNiLZmf1tEqPq0QQQE8jY3B03YrsIBK1bP6RI8N6wx/2hfX7h9LgFQvmw==
+  dependencies:
+    jsts "1.1.2"
+
+turf-within@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.npmjs.org/turf-within/-/turf-within-3.0.12.tgz"
+  integrity sha512-RgVeZ8LBZjcUSX8OvVW/nk2hJ1Vp+RPD+axOWaRf+zMbIiiBBAxmE8FxJSm6EINUuOR8zkvWIt+pyeltRYtG8A==
+  dependencies:
+    turf-helpers "^3.0.12"
+    turf-inside "^3.0.12"
+
+turf@^3.0.14:
+  version "3.0.14"
+  resolved "https://registry.npmjs.org/turf/-/turf-3.0.14.tgz"
+  integrity sha512-YKaS5wvijcTkGr1p6YQXh2xHWojhC6PMPo8pUFqphgJhq4DCtRBDc0UfbfbS/SD3ozzRFcGDrO3jrQqNBi3VAw==
+  dependencies:
+    turf-along "^3.0.12"
+    turf-area "^3.0.12"
+    turf-bbox "^3.0.12"
+    turf-bbox-polygon "^3.0.12"
+    turf-bearing "^3.0.12"
+    turf-bezier "^3.0.12"
+    turf-buffer "^3.0.12"
+    turf-center "^3.0.12"
+    turf-centroid "^3.0.12"
+    turf-circle "^3.0.12"
+    turf-collect "^3.0.12"
+    turf-combine "^3.0.12"
+    turf-concave "^3.0.12"
+    turf-convex "^3.0.12"
+    turf-destination "^3.0.12"
+    turf-difference "^3.0.12"
+    turf-distance "^3.0.12"
+    turf-envelope "^3.0.12"
+    turf-explode "^3.0.12"
+    turf-flip "^3.0.12"
+    turf-helpers "^3.0.12"
+    turf-hex-grid "^3.0.12"
+    turf-inside "^3.0.12"
+    turf-intersect "^3.0.12"
+    turf-isolines "^3.0.12"
+    turf-kinks "^3.0.12"
+    turf-line-distance "^3.0.12"
+    turf-line-slice "^3.0.12"
+    turf-meta "^3.0.12"
+    turf-midpoint "^3.0.12"
+    turf-nearest "^3.0.12"
+    turf-planepoint "^3.0.12"
+    turf-point-grid "^3.0.12"
+    turf-point-on-line "^3.0.12"
+    turf-point-on-surface "^3.0.12"
+    turf-random "^3.0.12"
+    turf-sample "^3.0.12"
+    turf-simplify "^3.0.12"
+    turf-square "^3.0.12"
+    turf-square-grid "^3.0.12"
+    turf-tag "^3.0.12"
+    turf-tesselate "^3.0.12"
+    turf-tin "^3.0.12"
+    turf-triangle-grid "^3.0.12"
+    turf-union "^3.0.12"
+    turf-within "^3.0.12"
+
+two-product@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/two-product/-/two-product-1.0.2.tgz"
+  integrity sha512-vOyrqmeYvzjToVM08iU52OFocWT6eB/I5LUWYnxeAPGXAhAxXYU/Yr/R2uY5/5n4bvJQL9AQulIuxpIsMoT8XQ==
+
+two-sum@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/two-sum/-/two-sum-1.0.0.tgz"
+  integrity sha512-phP48e8AawgsNUjEY2WvoIWqdie8PoiDZGxTDv70LDr01uX5wLEQbOgSP7Z/B6+SW5oLtbe8qaYX2fKJs3CGTw==
+
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
   dependencies:
@@ -5157,6 +5827,11 @@ unicode-match-property-value-ecmascript@^2.1.0:
 unicode-property-aliases-ecmascript@^2.0.0:
   version "2.1.0"
 
+union-find@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/union-find/-/union-find-1.0.2.tgz"
+  integrity sha512-wFA9bMD/40k7ZcpKVXfu6X1qD3ri5ryO8HUsuA1RnxPCQl66Mu6DgkxyR+XNnd+osD0aLENixcJVFj+uf+O4gw==
+
 universalify@^0.1.0:
   version "0.1.2"
 
@@ -5178,6 +5853,11 @@ use-latest-callback@^0.2.1:
   version "0.2.1"
   resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.2.1.tgz"
   integrity sha512-QWlq8Is8BGWBf883QOEQP5HWYX/kMI+JTbJ5rdtvJLmXTIh9XoHIO3PQcmQl8BU44VKxow1kbQUHa6mQSMALDQ==
+
+utf8@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/utf8/-/utf8-3.0.0.tgz"
+  integrity sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ==
 
 util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"
@@ -5203,7 +5883,7 @@ walker@^1.0.7, walker@^1.0.8:
   dependencies:
     makeerror "1.0.12"
 
-warn-once@^0.1.0:
+warn-once@^0.1.0, warn-once@0.1.1:
   version "0.1.1"
   resolved "https://registry.npmjs.org/warn-once/-/warn-once-0.1.1.tgz"
   integrity sha512-VkQZJbO8zVImzYFteBXvBOZEl1qL175WH8VmZcxF2fZAoudNhNDvHi+doCaAEdU2l2vtcIwa2zn0QK5+I1HQ3Q==
@@ -5215,6 +5895,11 @@ wcwidth@^1.0.1:
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
+
+wgs84@0.0.0:
+  version "0.0.0"
+  resolved "https://registry.npmjs.org/wgs84/-/wgs84-0.0.0.tgz"
+  integrity sha512-ANHlY4Rb5kHw40D0NJ6moaVfOCMrp9Gpd1R/AIQYg2ko4/jzcJ+TVXYYF6kXJqQwITvEZP4yEthjM7U6rYlljQ==
 
 whatwg-fetch@^3.0.0:
   version "3.6.20"

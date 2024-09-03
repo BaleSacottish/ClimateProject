@@ -5,7 +5,11 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+# platform :ios, min_ios_version_supported
+# prepare_react_native_project!
+
+platform :ios, '13.4'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -15,10 +19,13 @@ if linkage != nil
 end
 
 target 'ClimateProject' do
-  config = use_native_modules!
+  
 
   pod 'GoogleMaps'
-
+  pod 'react-native-maps', path: '../node_modules/react-native-maps'
+  pod 'Google-Maps-iOS-Utils', '4.2.2'
+  
+  config = use_native_modules!
   
 
   use_react_native!(
