@@ -26,11 +26,58 @@ const generatePolygonCoordinates2 = (latitude, longitude, distanceInMeters) => {
   ];
 };
 
+// const generatePolygonCoordinates = (data) => {
+//   const coordinates = demoData.map(item => ({
+//     latitude: item.latitude,
+//     longitude: item.longitude
+//   }));
+
+//   // Optionally close the polygon by connecting the last point back to the first
+//   if (coordinates.length > 0) {
+//     coordinates.push(coordinates[0]);
+//   }
+
+//   return coordinates;
+// };
+
+const calculateCentroid = (points) => {
+  const centroid = points.reduce((acc, point) => {
+    acc.latitude += point.latitude;
+    acc.longitude += point.longitude;
+    return acc;
+  }, { latitude: 0, longitude: 0 });
+
+  centroid.latitude /= points.length;
+  centroid.longitude /= points.length;
+
+  return centroid;
+};
+
+const sortPointsClockwise = (points) => {
+  const centroid = calculateCentroid(points);
+
+  return points.sort((a, b) => {
+    const angleA = Math.atan2(a.latitude - centroid.latitude, a.longitude - centroid.longitude);
+    const angleB = Math.atan2(b.latitude - centroid.latitude, b.longitude - centroid.longitude);
+    return angleA - angleB;
+  });
+};
+
 const generatePolygonCoordinates = (data) => {
-  return demoData.map(item => ({
+  const coordinates = demoData.map(item => ({
     latitude: item.latitude,
     longitude: item.longitude
   }));
+
+  // Sort points to form a better polygon
+  const sortedCoordinates = sortPointsClockwise(coordinates);
+
+  // Optionally close the polygon by connecting the last point back to the first
+  if (sortedCoordinates.length > 0) {
+    sortedCoordinates.push(sortedCoordinates[0]);
+  }
+
+  return sortedCoordinates;
 };
 
 
@@ -49,9 +96,10 @@ const Mapiso = () => {
     const value = parseFloat(pm25);
     if (isNaN(value)) return '#02AEEE'; // Default color if PM2.5 is not a number
     if (value < 10) return '#02AEEE'; // Blue
-    if (value <= 15) return colors.green_volumn; // Green
-    if (value <= 20) return colors.yellow_volumn; // Yellow
-    return colors.red_volnum; // Red
+    if (value > 10 && value <= 15) return '#32B648';
+    if (value > 15 && value <= 20) return '#FDFC01';
+    if (value > 20 && value <= 25) return '#F37135';
+    return '#EC1D25'; // Red
   };
 
   const markers = [
@@ -92,12 +140,15 @@ const Mapiso = () => {
     { latitude: 14.8682975839324, longitude: 102.01729597322 },
     { latitude: 14.8727967785766, longitude: 102.012796778576 },
     { latitude: 14.8772959732207, longitude: 102.003798389288 },
-    
+
   ];
 
- 
 
   const distanceInMeters = 400;
+
+  const layer1 = demoData.filter(item => item.Pm25 < 10);  // PM2.5 < 10
+  const layer2 = demoData.filter(item => item.Pm25 > 10 && item.Pm25 < 15);  // 10 ≤ PM2.5 ≤ 15
+  const layer3 = demoData.filter(item => item.Pm25 > 15 && item.Pm25 <= 20);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -123,8 +174,8 @@ const Mapiso = () => {
 
 
 
-
-          {/* {demoData.map((item) => {
+          {/* 
+          {demoData.map((item) => {
             // Generate coordinates
             const coordinates = generatePolygonCoordinates(item.latitude, item.longitude, distanceInMeters);
 
@@ -137,8 +188,9 @@ const Mapiso = () => {
                 fillColor={getColor(item.Pm25) + '50'} // Adding transparency
               />
             );
-          })}  */}
+          })} */}
 
+          {/* 
           {demoData.map((data, index) => {
             const polygonCoords = generatePolygonCoordinates2(
               data.latitude,
@@ -155,15 +207,37 @@ const Mapiso = () => {
                 strokeWidth={0.02}
               />
             );
-          })}
+          })} */}
 
 
-          {/* <Polygon
-            coordinates={isoplethPolygonCoordinates}
-            fillColor="rgba(255, 0, 0, 0.3)" // สีพื้นหลังพร้อมความโปร่งใส
-            strokeColor="rgba(255, 0, 0, 0.5)" // สีของเส้นขอบ
-            strokeWidth={2}
-          /> */}
+
+{/* 
+          {demoData.map((item) => {
+            // Generate coordinates
+            const coordinates = generatePolygonCoordinates(item.latitude, item.longitude, distanceInMeters);
+
+            return (
+              <Polygon
+                key={item.id}
+                coordinates={coordinates}
+                strokeColor={getColor(item.Pm25)}
+                strokeWidth={1}
+                fillColor={getColor(item.Pm25) + '50'} // Adding transparency
+              />
+
+
+            );
+          })} */}
+
+   
+
+      
+
+
+
+
+
+
 
 
 

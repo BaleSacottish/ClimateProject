@@ -6,7 +6,7 @@ export const demoData = [
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 8,
+        Pm25: 23,
         coordinates: [{
             latitude: 14.8818,
             longitude: 102.0173
@@ -20,13 +20,13 @@ export const demoData = [
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 10,
+        Pm25: 9,
         coordinates: [{
-            latitude: 14.8682975839324,
-            longitude: 102.01729597322
+            latitude: 14.8638,
+            longitude: 102.03529
         }],
-        latitude: 14.8682975839324,
-        longitude: 102.01729597322
+        latitude: 14.8638,
+        longitude: 102.03529
 
 
     },
@@ -36,13 +36,13 @@ export const demoData = [
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 25,
+        Pm25: 4,
         coordinates: [{
-            latitude: 14.8817951678649,
-            longitude: 101.999299194644
+            latitude: 14.8592991946441,
+            longitude: 102.035292751797
         }],
-        latitude: 14.8817951678649,
-        longitude: 101.999299194644
+        latitude: 14.8592991946441,
+        longitude: 102.035292751797
 
     },
     {
@@ -51,7 +51,7 @@ export const demoData = [
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 9,
+        Pm25: 8,
         coordinates: [{
             latitude: 14.8592991946441,
             longitude: 102.039791946441
@@ -66,7 +66,7 @@ export const demoData = [
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 24,
+        Pm25: 12,
         coordinates: [{
             latitude: 14.8637983892883,
             longitude: 102.026294362509
@@ -77,17 +77,17 @@ export const demoData = [
     },
     {
         id: 6,
-        station: "สถานีที่ 5 อาคารเรียนรวม 5",
+        station: "สถานีที่ 6 อาคารเรียนรวม 5",
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 24,
+        Pm25: 13,
         coordinates: [{
             latitude: 14.8637983892883,
-            longitude: 102.039791946441
+            longitude: 102.030793557153
         }],
         latitude: 14.8637983892883,
-        longitude: 102.039791946441
+        longitude: 102.030793557153
 
     },
     {
@@ -107,11 +107,11 @@ export const demoData = [
     },
     {
         id: 8,
-        station: "สถานีที่ 5 อาคารเรียนรวม 5",
+        station: "สถานีที่ 8 อาคารเรียนรวม 5",
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 20,
+        Pm25: 21,
         coordinates: [{
             latitude: 14.8727967785766,
             longitude: 102.012796778576
@@ -122,11 +122,11 @@ export const demoData = [
     },
     {
         id: 9,
-        station: "สถานีที่ 5 อาคารเรียนรวม 5",
+        station: "สถานีที่ 9 อาคารเรียนรวม 5",
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 24,
+        Pm25: 25,
         coordinates: [{
             latitude: 14.8817951678649,
             longitude: 102.003798389288
@@ -137,11 +137,11 @@ export const demoData = [
     },
     {
         id: 10,
-        station: "สถานีที่ 5 อาคารเรียนรวม 5",
+        station: "สถานีที่ 10 อาคารเรียนรวม 5",
         date: "28/8/2024",
         time: "12:43",
         //Pm25 = pm2.5
-        Pm25: 24,
+        Pm25: 20,
         coordinates: [{
             latitude: 14.8862943625091,
             longitude: 101.999299194644

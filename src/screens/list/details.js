@@ -1,5 +1,5 @@
 import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useRoute } from 'react'
 
 import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, } from 'react-native-maps';
 
@@ -22,6 +22,9 @@ import Feather from 'react-native-vector-icons/Feather'
 const { width, height } = Dimensions.get('screen');
 
 
+import { firebase, firestore } from '../db/config'
+
+
 /**
  * @param {object} props
  * @param {IPage1} props.value
@@ -30,14 +33,54 @@ const { width, height } = Dimensions.get('screen');
 
 
 
-const Details = ({ }) => {
+const Details = ({ route }) => {
+
+  const { stations } = route.params;
+
+  const [lineData1, setLinedata1] = useState([])
+  const [linedata2, setLinedata2] = useState(new Array(30).fill(0));
+
+  const [datalive1, setDataline1] = useState(lineData1)
+  const [datalive2, setDataline2] = useState(linedata2)
+
+  const [statusPm, setStatusPm] = useState(null);
+
 
   const [pinmark, setPinmark] = useState(demoData)
 
-  const detailsData = demoData[0]
-
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // const [stations, setStations] = useState([]);
+  const [statusStation, setStatusStation] = useState([]);
+
+  const labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+  const labels_month = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+
+
+  console.log(lineData1)
+
+  const chartData = {
+    labels: labels,
+    datasets: [
+      {
+        data: lineData1, // Your data for 7 days
+        strokeWidth: 2, // optional
+      },
+    ],
+  };
+
+  const chartData2 = {
+    labels: labels,
+    datasets: [
+      {
+        data: lineData1, // Your data for 30 days
+        strokeWidth: 2, // Optional
+      },
+    ],
+  };
+
+ 
 
   const toggleFilter = () => {
     setIsFilterVisible(!isFilterVisible);
@@ -53,7 +96,6 @@ const Details = ({ }) => {
     inputRange: [0, 1],
     outputRange: ['0%', '80%'] // Change these percentages based on your layout requirements
   });
-
 
   const markers = pinmark.map(coord => ({
     id: coord.id,
@@ -73,7 +115,169 @@ const Details = ({ }) => {
   }));
 
 
- 
+
+  //get data details 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const stationCollection = await firestore().collection('satationTesting').get();
+
+        const stationListPromises = stationCollection.docs.map(async (doc) => {
+          const subcollectionSnapshot = await firestore()
+            .collection('satationTesting')
+            .doc(doc.id)
+            .collection('status')
+            .limit(1)
+            .get();
+
+          ;
+
+          const subcollectionData = subcollectionSnapshot.docs.map(subDoc => ({
+            id: subDoc.id,
+            ...subDoc.data(),
+          }));
+
+          // console.log('check:', subcollectionData)
+
+          return {
+            id: doc.id,
+            ...doc.data(),
+            status: subcollectionData,
+            status: subcollectionData.length > 0 ? subcollectionData[0] : null
+          };
+        });
+
+
+
+        const stationsWithDetails = await Promise.all(stationListPromises);
+        // const statusWithDetails = await Promise.all(statusListPromises);
+
+
+
+        setStatusStation(stationsWithDetails);
+        // console.log('check SubClass', stationsWithDetails);
+        // const allStatus = stationsWithDetails.flatMap(station => station.status);
+        // setStatusIs(allStatus);
+
+      } catch (error) {
+        console.error('Error fetching stations and subcollections: ', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // useEffect(() => {
+
+  //   const fetchData = async () => {
+  //     try {
+  //       const stationCollection = await firestore()
+  //         .collection('satationTesting')
+  //         .get();
+
+  //       let aggregatedData = []; // To store aggregated "status_pm" values
+  //       const documentIds = []; // Array to store document IDs
+
+  //       // Collect IDs of documents
+  //       stationCollection.docs.forEach(doc => {
+  //         documentIds.push(doc.id);
+  //       });
+
+  //       // Fetch data from each specific document ID
+  //       const stationListPromises = documentIds.map(async (docId) => {
+  //         const subcollectionSnapshot = await firestore()
+  //           .collection('satationTesting')
+  //           .doc(docId)
+  //           .collection('status')
+  //           .get();
+
+  //         subcollectionSnapshot.docs.forEach((subDoc) => {
+  //           const subDocData = subDoc.data();
+  //           // Check if "status_pm" exists and is a valid number
+  //           if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
+  //             aggregatedData.push(subDocData.status_pm); // Only push valid numbers
+  //           }
+  //         });
+  //       });
+
+  //       // Wait for all promises to resolve
+  //       await Promise.all(stationListPromises);
+
+  //       if (aggregatedData.length === 0) {
+  //         aggregatedData = [0, 0, 0, 0, 0, 0, 0]; // Example fallback data
+  //       }
+
+  //       if (aggregatedData.length > 0) {
+  //         const fetchedData = {
+  //           labels: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."], // Customize labels if necessary
+  //           datasets: [
+  //             {
+  //               data: aggregatedData, // Use aggregated "status_pm" data
+  //               color: (opacity = 1) => `rgba(22, 49, 194, ${opacity})`,
+  //               strokeWidth: 2,
+  //             }
+  //           ],
+  //           legend: ["หนึ่งสัปดาห์"],
+  //         };
+
+  //         setLinedata1(fetchedData);
+  //         // console.log(fetchedData);
+  //       }
+
+  //     } catch (error) {
+  //       console.error('Error fetching Firestore data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+
+  // ฟังก์ชันดึงข้อมูลจาก Firestore
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Ensure that "stations" ID is available from route.params
+        if (!stations || !stations.id) {
+          console.error('No station ID found in route parameters');
+          return;
+        }
+
+        const stationDocRef = firestore()
+          .collection('satationTesting')
+          .doc(stations.id); // Use the station ID from route.params
+
+        // Fetch subcollection 'status' within the station document
+        const subcollectionSnapshot = await stationDocRef
+          .collection('status')
+          .get(); // Fetch all subdocuments in 'status' subcollection for this station
+
+        let aggregatedData = []; // To store all "status_pm" values
+
+        subcollectionSnapshot.docs.forEach((subDoc) => {
+          const subDocData = subDoc.data();
+          // Check if "status_pm" exists and is a valid number
+          if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
+            aggregatedData.push(subDocData.status_pm); // Push valid numbers
+          }
+        });
+
+        if (aggregatedData.length === 0) {
+          aggregatedData = [0]; // Example fallback data if no valid status_pm values are found
+        }
+
+        // Process or store the aggregatedData as needed
+        console.log('Aggregated status_pm for station:', aggregatedData);
+        setLinedata1(aggregatedData); // Example: store in state for use in charts
+
+      } catch (error) {
+        console.error('Error fetching Firestore data:', error);
+      }
+    };
+
+    fetchData();
+  }, [stations]);
 
 
 
@@ -83,46 +287,105 @@ const Details = ({ }) => {
       <View style={{ padding: 5, flex: 1 }}>
         <View style={{ width: '100%', height: 80, flexDirection: 'row', }}>
 
-          {/*Text Station */}
-          <View style={{ width: '35%', height: '100%', alignItems: 'center' }}>
-            <Text style={{ alignSelf: 'center', fontSize: 20, fontWeight: 'bold', color: colors.white,width:110 }}>{detailsData.station}</Text>
+          <View style={{ width: '35%', height: '100%', alignItems: 'center', }}>
+            <Text key={stations.id} style={{ alignSelf: 'center', fontSize: 20, fontWeight: 'bold', color: colors.white, width: 100 }}>
+              {stations.station_name || 'Unknown'}
+            </Text>
           </View>
 
-          <View style={{ width: '60%', height: '100%', alignItems: 'center', justifyContent: 'space-around', flexDirection: 'row' }}>
 
-            <View style={{ height: 70, width: 70, alignSelf: 'center', borderRightColor: '#fff', borderRightWidth: 5, }}>
-              <Feather
-                name={"calendar"}
-                size={40}
-                color={colors.white}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 40 }}>{detailsData.date}</Text>
+
+          {/* 
+          {stations.status && stations.status.length > 0 && (
+            stations.status.map((status, index) => (
+              <View key={index} style={{ width: '60%', height: '100%', alignItems: 'center', justifyContent: 'space-around', flexDirection: 'row' }}>
+
+                <View style={{ height: 70, width: 70, alignSelf: 'center', borderRightColor: '#fff', borderRightWidth: 5, }}>
+                  <Feather
+                    name={"calendar"}
+                    size={40}
+                    color={colors.white}
+                    style={{ alignSelf: 'center', right: 5 }}
+                  />
+
+                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 5 }}>
+                    {status.status_date || 'Unknown'}
+                  </Text>
+                </View>
+
+                <View style={{ height: 70, width: 70, alignSelf: 'center', left: 2, borderRightColor: '#fff', borderRightWidth: 5, }}>
+                  <Feather
+                    name={"clock"}
+                    size={40}
+                    color={colors.white}
+                    style={{ alignSelf: 'center', right: 5 }}
+                  />
+                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, right: 5 }}>
+                    {status.status_time || 'Unknown'}
+                  </Text>
+                </View>
+
+                <View style={{ height: 70, width: 40, alignSelf: 'center', left: 4, }}>
+                  <Feather
+                    name={"cloud"}
+                    size={40}
+                    color={colors.white}
+                    style={{ alignSelf: 'center' }}
+                  />
+                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16 }}>
+                    {status.status_pm || 'Unknown'}
+                  </Text>
+
+                </View>
+
+              </View>
+            ))
+          )} */}
+
+
+
+          {stations.status && (
+            <View style={{ height: '100%', width: '65%', backgroundColor: colors.bluemeduim, flexDirection: 'row', justifyContent: 'space-around', borderTopRightRadius: 20, borderBottomRightRadius: 20, padding: 5 }}>
+              {/* Date */}
+              <View style={{ height: 70, width: 70, alignSelf: 'center', borderRightColor: '#fff', borderRightWidth: 5 }}>
+                <Feather
+                  name={"calendar"}
+                  size={40}
+                  color={colors.white}
+                  style={{ alignSelf: 'center', right: 5 }}
+                />
+                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 3 }}>
+                  {stations.status.status_date || 'not found'}
+                </Text>
+              </View>
+
+              {/* Time */}
+              <View style={{ height: 70, width: 70, alignSelf: 'center', left: 2, borderRightColor: '#fff', borderRightWidth: 5 }}>
+                <Feather
+                  name={"clock"}
+                  size={40}
+                  color={colors.white}
+                  style={{ alignSelf: 'center', right: 5 }}
+                />
+                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 3 }}>
+                  {stations.status.status_time || 'not found'}
+                </Text>
+              </View>
+
+              {/* PM2.5 */}
+              <View style={{ height: 70, width: 40, alignSelf: 'center', left: 4 }}>
+                <Feather
+                  name={"cloud"}
+                  size={40}
+                  color={colors.white}
+                  style={{ alignSelf: 'center' }}
+                />
+                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 20 }}>
+                  {stations.status.status_pm || 'not found'}
+                </Text>
+              </View>
             </View>
-
-            <View style={{ height: 70, width: 70, alignSelf: 'center', left: 2, borderRightColor: '#fff', borderRightWidth: 5, }}>
-              <Feather
-                name={"clock"}
-                size={40}
-                color={colors.white}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, }}>{detailsData.time}</Text>
-            </View>
-
-            <View style={{ height: 70, width: 70, alignSelf: 'center', left: 4, }}>
-              <Feather
-                name={"cloud"}
-                size={40}
-                color={colors.white}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16 }}>{detailsData.Pm25}</Text>
-
-            </View>
-
-          </View>
-
+          )}
 
 
         </View>
@@ -136,31 +399,20 @@ const Details = ({ }) => {
     return (
 
       <View style={{ width: '100%', height: 80, top: 100 }}>
-        {/* <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
-          
-            <Feather
-              name={"circle"}
-              size={30}
-              color={colors.white}
-              style={{ alignSelf:'center',backgroundColor:colors.green_volumn,borderRadius:35,width:30,height:30 }}
-            />
-            <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 40,left:10 }}>Good</Text>
-          
 
-        </View> */}
         <LineChart
-          style={{ alignSelf: 'center',borderRadius:20 }}
-          data={datelineSerive}
+          style={{ alignSelf: 'center', borderRadius: 20 }}
+          data={chartData}
           width={width * 90 / 100}
           height={180}
           borderRadius={20}
           chartConfig={chartConfig}
-          
+
         />
 
         <LineChart
-          style={{ alignSelf: 'center',borderRadius:20 ,marginTop:10}}
-          data={monthlineSerive}
+          style={{ alignSelf: 'center', borderRadius: 20, marginTop: 10 }}
+          data={chartData2}
           width={width * 90 / 100}
           height={180}
           chartConfig={chartConfig}

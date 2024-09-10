@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "307910444889",
+    "firebase_url": "https://climetapipe-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "climetapipe",
+    "storage_bucket": "climetapipe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307910444889:android:33ab880b8d49881784ae48",
+        "android_client_info": {
+          "package_name": "com.climatepipe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABIxYH8sREyR7kM9sRbKG1w2reyIgyRz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307910444889:android:a4e45c043c03be6d84ae48",
+        "android_client_info": {
+          "package_name": "com.climateproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABIxYH8sREyR7kM9sRbKG1w2reyIgyRz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
