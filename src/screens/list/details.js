@@ -1,7 +1,7 @@
 import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native'
 import React, { useState, useEffect, useRef, useRoute } from 'react'
 
-import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, Polygon, Polyline, Circle } from 'react-native-maps';
 
 
 import {
@@ -23,6 +23,8 @@ const { width, height } = Dimensions.get('screen');
 
 
 import { firebase, firestore } from '../db/config'
+import { addDays, format } from 'date-fns'; // ใช้ date-fns เพื่อจัดการวันที่
+
 
 
 /**
@@ -33,20 +35,30 @@ import { firebase, firestore } from '../db/config'
 
 
 
+
+
+
 const Details = ({ route }) => {
 
   const { stations } = route.params;
 
+
+  // const { station_codinates, stations } = route.params || {};
+
+
   const [lineData1, setLinedata1] = useState([])
   const [linedata2, setLinedata2] = useState(new Array(30).fill(0));
 
-  const [datalive1, setDataline1] = useState(lineData1)
-  const [datalive2, setDataline2] = useState(linedata2)
+  const [statusPoly, setStatusPoly] = useState([])
+  const [stationmaker, setStationmarker] = useState([])
 
-  const [statusPm, setStatusPm] = useState(null);
+  const [polygonCoordinates, setPolygonCoordinates] = useState([]);
 
 
-  const [pinmark, setPinmark] = useState(demoData)
+
+  const [loading, setLoading] = useState(true);
+
+  
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -58,7 +70,6 @@ const Details = ({ route }) => {
   const labels_month = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
 
 
-  console.log(lineData1)
 
   const chartData = {
     labels: labels,
@@ -80,7 +91,7 @@ const Details = ({ route }) => {
     ],
   };
 
- 
+
 
   const toggleFilter = () => {
     setIsFilterVisible(!isFilterVisible);
@@ -97,135 +108,54 @@ const Details = ({ route }) => {
     outputRange: ['0%', '80%'] // Change these percentages based on your layout requirements
   });
 
-  const markers = pinmark.map(coord => ({
-    id: coord.id,
-    coordinate: {
-      latitude: coord.latitude,
-      longitude: coord.longitude
-    },
-    title: coord.title,
-    description: coord.description,
-    weight: coord.weight
-  }));
 
-  const points = markers.map(marker => ({
-    latitude: marker.coordinate.latitude,
-    longitude: marker.coordinate.longitude,
-    weight: marker.weight || 1, // default weight if not defined
-  }));
 
 
 
   //get data details 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const stationCollection = await firestore().collection('satationTesting').get();
-
-        const stationListPromises = stationCollection.docs.map(async (doc) => {
-          const subcollectionSnapshot = await firestore()
-            .collection('satationTesting')
-            .doc(doc.id)
-            .collection('status')
-            .limit(1)
-            .get();
-
-          ;
-
-          const subcollectionData = subcollectionSnapshot.docs.map(subDoc => ({
-            id: subDoc.id,
-            ...subDoc.data(),
-          }));
-
-          // console.log('check:', subcollectionData)
-
-          return {
-            id: doc.id,
-            ...doc.data(),
-            status: subcollectionData,
-            status: subcollectionData.length > 0 ? subcollectionData[0] : null
-          };
-        });
-
-
-
-        const stationsWithDetails = await Promise.all(stationListPromises);
-        // const statusWithDetails = await Promise.all(statusListPromises);
-
-
-
-        setStatusStation(stationsWithDetails);
-        // console.log('check SubClass', stationsWithDetails);
-        // const allStatus = stationsWithDetails.flatMap(station => station.status);
-        // setStatusIs(allStatus);
-
-      } catch (error) {
-        console.error('Error fetching stations and subcollections: ', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // useEffect(() => {
-
   //   const fetchData = async () => {
   //     try {
-  //       const stationCollection = await firestore()
-  //         .collection('satationTesting')
-  //         .get();
+  //       const stationCollection = await firestore().collection('station_realair').get();
 
-  //       let aggregatedData = []; // To store aggregated "status_pm" values
-  //       const documentIds = []; // Array to store document IDs
-
-  //       // Collect IDs of documents
-  //       stationCollection.docs.forEach(doc => {
-  //         documentIds.push(doc.id);
-  //       });
-
-  //       // Fetch data from each specific document ID
-  //       const stationListPromises = documentIds.map(async (docId) => {
+  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
   //         const subcollectionSnapshot = await firestore()
-  //           .collection('satationTesting')
-  //           .doc(docId)
+  //           .collection('station_realair')
+  //           .doc(doc.id)
   //           .collection('status')
+  //           .limit(1)
   //           .get();
 
-  //         subcollectionSnapshot.docs.forEach((subDoc) => {
-  //           const subDocData = subDoc.data();
-  //           // Check if "status_pm" exists and is a valid number
-  //           if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
-  //             aggregatedData.push(subDocData.status_pm); // Only push valid numbers
-  //           }
-  //         });
+  //         ;
+
+  //         const subcollectionData = subcollectionSnapshot.docs.map(subDoc => ({
+  //           id: subDoc.id,
+  //           ...subDoc.data(),
+  //         }));
+
+  //         // console.log('check:', subcollectionData)
+
+  //         return {
+  //           id: doc.id,
+  //           ...doc.data(),
+  //           status: subcollectionData,
+  //           status: subcollectionData.length > 0 ? subcollectionData[0] : null
+  //         };
   //       });
 
-  //       // Wait for all promises to resolve
-  //       await Promise.all(stationListPromises);
 
-  //       if (aggregatedData.length === 0) {
-  //         aggregatedData = [0, 0, 0, 0, 0, 0, 0]; // Example fallback data
-  //       }
 
-  //       if (aggregatedData.length > 0) {
-  //         const fetchedData = {
-  //           labels: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."], // Customize labels if necessary
-  //           datasets: [
-  //             {
-  //               data: aggregatedData, // Use aggregated "status_pm" data
-  //               color: (opacity = 1) => `rgba(22, 49, 194, ${opacity})`,
-  //               strokeWidth: 2,
-  //             }
-  //           ],
-  //           legend: ["หนึ่งสัปดาห์"],
-  //         };
+  //       const stationsWithDetails = await Promise.all(stationListPromises);
+  //       // const statusWithDetails = await Promise.all(statusListPromises);
 
-  //         setLinedata1(fetchedData);
-  //         // console.log(fetchedData);
-  //       }
 
+
+  //       setStatusStation(stationsWithDetails);
+  //       // console.log('check SubClass', stationsWithDetails);
+  //       // const allStatus = stationsWithDetails.flatMap(station => station.status);
+  //       // setStatusIs(allStatus);
   //     } catch (error) {
-  //       console.error('Error fetching Firestore data:', error);
+  //       console.error('Error fetching stations and subcollections: ', error);
   //     }
   //   };
 
@@ -233,43 +163,89 @@ const Details = ({ route }) => {
   // }, []);
 
 
-  // ฟังก์ชันดึงข้อมูลจาก Firestore
+  //lindata
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       // Ensure that "stations" ID is available from route.params
+  //       if (!stations || !stations.id) {
+  //         console.error('No station ID found in route parameters');
+  //         return;
+  //       }
+
+  //       const stationDocRef = firestore()
+  //         .collection('station_realair')
+  //         .doc(stations.id); // Use the station ID from route.params
+
+  //       // Fetch subcollection 'status' within the station document
+  //       const subcollectionSnapshot = await stationDocRef
+  //         .collection('status')
+  //         .get(); // Fetch all subdocuments in 'status' subcollection for this station
+
+  //       let aggregatedData = []; // To store all "status_pm" values
+
+  //       subcollectionSnapshot.docs.forEach((subDoc) => {
+  //         const subDocData = subDoc.data();
+  //         // Check if "status_pm" exists and is a valid number
+  //         if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
+  //           aggregatedData.push(subDocData.status_pm); // Push valid numbers
+  //         }
+  //       });
+
+  //       if (aggregatedData.length === 0) {
+  //         aggregatedData = [0]; // Example fallback data if no valid status_pm values are found
+  //       }
+
+  //       // Process or store the aggregatedData as needed
+  //       // console.log('Aggregated status_pm for station:', aggregatedData);
+  //       setLinedata1(aggregatedData); // Example: store in state for use in charts
+
+  //     } catch (error) {
+  //       console.error('Error fetching Firestore data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [stations]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Ensure that "stations" ID is available from route.params
         if (!stations || !stations.id) {
           console.error('No station ID found in route parameters');
           return;
         }
 
         const stationDocRef = firestore()
-          .collection('satationTesting')
-          .doc(stations.id); // Use the station ID from route.params
+          .collection('station_realair')
+          .doc(stations.id);
 
-        // Fetch subcollection 'status' within the station document
+        const currentDate = new Date();
+        const sevenDaysAgo = addDays(currentDate, -7);
+
         const subcollectionSnapshot = await stationDocRef
           .collection('status')
-          .get(); // Fetch all subdocuments in 'status' subcollection for this station
+          .where('status_datestamp', '>=', sevenDaysAgo)
+          .orderBy('status_datestamp', 'desc')
+          .get();
 
-        let aggregatedData = []; // To store all "status_pm" values
+        let aggregatedData = [];
 
         subcollectionSnapshot.docs.forEach((subDoc) => {
           const subDocData = subDoc.data();
-          // Check if "status_pm" exists and is a valid number
           if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
-            aggregatedData.push(subDocData.status_pm); // Push valid numbers
+            aggregatedData.push({
+              date: subDocData.status_datestamp.toDate(),
+              pmValue: subDocData.status_pm,
+            });
           }
         });
 
         if (aggregatedData.length === 0) {
-          aggregatedData = [0]; // Example fallback data if no valid status_pm values are found
+          aggregatedData = [{ date: currentDate, pmValue: 0 }];
         }
 
-        // Process or store the aggregatedData as needed
-        console.log('Aggregated status_pm for station:', aggregatedData);
-        setLinedata1(aggregatedData); // Example: store in state for use in charts
+        setLinedata1(aggregatedData);
 
       } catch (error) {
         console.error('Error fetching Firestore data:', error);
@@ -278,6 +254,249 @@ const Details = ({ route }) => {
 
     fetchData();
   }, [stations]);
+
+
+  // useEffect(() => {
+  //   const fetchStationsAndStatus = async () => {
+  //     try {
+  //       // Fetch data from 'station_realair' collection
+  //       const stationCollection = await firestore().collection('station_realair').get();
+
+  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
+  //         const stationData = doc.data();
+
+  //         // Query to get the latest status from 'status' subcollection
+  //         const statusSnapshot = await firestore()
+  //           .collection('station_realair')
+  //           .doc(doc.id)
+  //           .collection('status')
+  //           .orderBy('status_datestamp', 'desc') // Order by latest status
+  //           .limit(1) // Limit to 1 document
+  //           .get();
+
+  //         const statusData = statusSnapshot.docs.map(subDoc => {
+  //           const status = subDoc.data();
+
+  //           // Convert status_datestamp from Firestore Timestamp to Date
+  //           const status_datestamp = status.status_datestamp.toDate();
+
+  //           return {
+  //             id: subDoc.id,
+  //             ...status,
+  //             status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
+  //           };
+  //         });
+
+  //         // Verify coordinate data
+  //         const cordinates = stationData.station_codinates;
+
+  //         if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
+  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
+  //           return null;
+  //         }
+
+  //         // Generate polygon coordinates around the central point
+  //         const radiusInMeters = 400; // Define the radius for the polygon
+  //         const polygonCoordinates = generatePolygonCoordinates(cordinates, radiusInMeters);
+
+  //         // Ensure polygon coordinates are valid
+  //         if (!polygonCoordinates || polygonCoordinates.length === 0) {
+  //           console.error(`No valid coordinates for document ${doc.id}`);
+  //           return null;
+  //         }
+
+  //         return {
+  //           id: doc.id,
+  //           station_name: stationData.station_name,
+  //           coordinates: polygonCoordinates,
+  //           status: statusData.length > 0 ? statusData[0] : null // Use latest status
+  //         };
+  //       });
+
+  //       const stationsWithDetails = await Promise.all(stationListPromises);
+
+  //       // Filter out null values
+  //       const validStations = stationsWithDetails.filter(station => station !== null);
+
+  //       setStatusPoly(validStations);
+
+  //     } catch (error) {
+  //       console.error('Error fetching stations and status: ', error);
+  //     } finally {
+  //       setLoading(false); // Hide loading indicator when data is loaded
+  //     }
+  //   };
+
+  //   fetchStationsAndStatus(); // Call function on component mount
+  // }, [stations]);
+
+  useEffect(() => {
+    const fetchStationAndStatus = async () => {
+      try {
+        // Ensure that "stations" ID is available from route.params
+        if (!stations || !stations.id) {
+          console.error('No station ID found in route parameters');
+          return;
+        }
+
+        // Fetch the specific station document by ID from 'station_realair' collection
+        const stationDocRef = firestore().collection('station_realair').doc(stations.id);
+        const stationDocSnapshot = await stationDocRef.get();
+
+        if (!stationDocSnapshot.exists) {
+          console.error(`No station found with ID: ${stations.id}`);
+          return;
+        }
+
+        const stationData = stationDocSnapshot.data();
+
+        // Fetch the latest status from the 'status' subcollection for this specific station
+        const statusSnapshot = await stationDocRef
+          .collection('status')
+          .orderBy('status_datestamp', 'desc') // Order by latest status
+          .limit(1) // Limit to 1 document
+          .get();
+
+        const statusData = statusSnapshot.docs.map(subDoc => {
+          const status = subDoc.data();
+
+          // Convert Firestore Timestamp to Date
+          const status_datestamp = status.status_datestamp.toDate();
+
+          return {
+            id: subDoc.id,
+            ...status,
+            status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
+          };
+        });
+
+        // Verify that the station has valid coordinates
+        const coordinates = stationData.station_codinates;
+
+        if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
+          console.error(`Invalid or missing coordinates for station ${stations.id}`);
+          return;
+        }
+
+        // Generate polygon coordinates around the central point (the station's coordinates)
+        const radiusInMeters = 400; // Define the radius for the polygon
+        const polygonCoordinates = generatePolygonCoordinates(coordinates, radiusInMeters);
+
+        // Ensure polygon coordinates are valid
+        if (!polygonCoordinates || polygonCoordinates.length === 0) {
+          console.error(`No valid polygon coordinates for station ${stations.id}`);
+          return;
+        }
+
+        // Construct the station data
+        const stationDetails = {
+          id: stationDocSnapshot.id,
+          station_name: stationData.station_name,
+          coordinates: polygonCoordinates,
+          status: statusData.length > 0 ? statusData[0] : null // Use latest status
+        };
+
+        // Store the data in the state
+        setStatusPoly([stationDetails]); // Set as an array with one station
+
+      } catch (error) {
+        console.error('Error fetching station and status: ', error);
+      } finally {
+        setLoading(false); // Hide loading indicator when data is loaded
+      }
+    };
+
+    fetchStationAndStatus(); // Call function on component mount
+  }, [stations]);
+
+  useEffect(() => {
+    const fetchStationAndStatus = async () => {
+      try {
+        // Ensure that "stations" ID is available from route.params
+        if (!stations || !stations.id) {
+          console.error('No station ID found in route parameters');
+          return;
+        }
+
+        // Fetch the specific station document by ID from 'station_realair' collection
+        const stationDocRef = firestore().collection('station_realair').doc(stations.id);
+        const stationDocSnapshot = await stationDocRef.get();
+
+        if (!stationDocSnapshot.exists) {
+          console.error(`No station found with ID: ${stations.id}`);
+          return;
+        }
+
+        const stationData = stationDocSnapshot.data();
+
+        // Query to get the latest status from 'status' subcollection
+        const statusSnapshot = await stationDocRef
+          .collection('status')
+          .orderBy('status_datestamp', 'desc')
+          .limit(1)
+          .get();
+
+        const statusData = statusSnapshot.docs.map(subDoc => {
+          const status = subDoc.data();
+          const status_datestamp = status.status_datestamp.toDate();
+
+          return {
+            id: subDoc.id,
+            ...status,
+            status_datestamp: status_datestamp.toLocaleString()
+          };
+        });
+
+        const coordinates = stationData.station_codinates;
+
+        // Check if coordinates exist and are valid
+        if (!coordinates || typeof coordinates.latitude !== 'number' || typeof coordinates.longitude !== 'number') {
+          console.error(`Invalid or missing coordinates for station ${stations.id}`);
+          return;
+        }
+
+        // Create the station details
+        const stationDetails = {
+          id: stationDocSnapshot.id,
+          station_name: stationData.station_name,
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          status: statusData.length > 0 ? statusData[0] : null
+        };
+
+        setStationmarker([stationDetails]); // Set the marker for this station only
+
+      } catch (error) {
+        console.error('Error fetching station and status: ', error);
+      } finally {
+        setLoading(false); // Hide loading indicator when data is loaded
+      }
+    };
+
+    fetchStationAndStatus();
+  }, [stations]);
+
+  function generatePolygonCoordinates(center, radiusInMeters, numPoints = 6) {
+    const coordinates = [];
+    const angleStep = (2 * Math.PI) / numPoints;
+
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep;
+      const xOffset = radiusInMeters * Math.cos(angle);
+      const yOffset = radiusInMeters * Math.sin(angle);
+
+      // Convert offsets to latitude and longitude (assumes small distances)
+      const latOffset = xOffset / 111320; // Approximate conversion from meters to latitude
+      const lngOffset = yOffset / (111320 * Math.cos(center.latitude * (Math.PI / 180))); // Approximate conversion
+
+      coordinates.push({
+        latitude: center.latitude + latOffset,
+        longitude: center.longitude + lngOffset
+      });
+    }
+
+    return coordinates;
+  }
 
 
 
@@ -345,35 +564,32 @@ const Details = ({ route }) => {
 
 
           {stations.status && (
-            <View style={{ height: '100%', width: '65%', backgroundColor: colors.bluemeduim, flexDirection: 'row', justifyContent: 'space-around', borderTopRightRadius: 20, borderBottomRightRadius: 20, padding: 5 }}>
-              {/* Date */}
-              <View style={{ height: 70, width: 70, alignSelf: 'center', borderRightColor: '#fff', borderRightWidth: 5 }}>
-                <Feather
-                  name={"calendar"}
-                  size={40}
-                  color={colors.white}
-                  style={{ alignSelf: 'center', right: 5 }}
-                />
-                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 3 }}>
-                  {stations.status.status_date || 'not found'}
-                </Text>
-              </View>
 
-              {/* Time */}
-              <View style={{ height: 70, width: 70, alignSelf: 'center', left: 2, borderRightColor: '#fff', borderRightWidth: 5 }}>
-                <Feather
-                  name={"clock"}
-                  size={40}
-                  color={colors.white}
-                  style={{ alignSelf: 'center', right: 5 }}
-                />
-                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 3 }}>
-                  {stations.status.status_time || 'not found'}
+            <View style={{ height: '100%', width: '65%', backgroundColor: colors.bluemeduim, flexDirection: 'row', justifyContent: 'space-evenly', borderTopRightRadius: 20, borderBottomRightRadius: 20, padding: 5 }}>
+              {/* Date */}
+              <View style={{ height: 70, width: 110, alignSelf: 'center', justifyContent: 'flex-start' }}>
+                <View style={{ flexDirection: "row", justifyContent: 'space-between', }}>
+                  <Feather
+                    name={"calendar"}
+                    size={40}
+                    color={colors.white}
+                    style={{ alignSelf: 'center', }}
+                  />
+                  <Feather
+                    name={"clock"}
+                    size={40}
+                    color={colors.white}
+                    style={{ alignSelf: 'center', }}
+                  />
+                </View>
+
+                <Text style={{ color: colors.white, marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 180, alignSelf: 'center', left: 5 }}>
+                  {stations.status.status_datestamp}
                 </Text>
               </View>
 
               {/* PM2.5 */}
-              <View style={{ height: 70, width: 40, alignSelf: 'center', left: 4 }}>
+              <View style={{ height: 70, width: 40, alignSelf: 'center', }}>
                 <Feather
                   name={"cloud"}
                   size={40}
@@ -385,17 +601,18 @@ const Details = ({ route }) => {
                 </Text>
               </View>
             </View>
+
           )}
 
 
         </View>
-      </View>
+      </View >
 
 
     );
   }
 
-  const ModalpopupData = ({ navigation, navigate, props }) => {
+  const ModalpopupData = ({ data }) => {
     return (
 
       <View style={{ width: '100%', height: 80, top: 100 }}>
@@ -442,28 +659,43 @@ const Details = ({ route }) => {
           }}
         >
 
-          {markers.map(marker => (
-            <Marker
-              key={marker.id}
-              coordinate={marker.coordinate}
-            >
 
-            </Marker>
+          {stationmaker.map((station, index) => (
+            // Ensure that coordinates are valid before rendering the marker
+            station.latitude && station.longitude ? (
+              <Marker
+                key={index}
+                coordinate={{
+                  latitude: station.latitude,
+                  longitude: station.longitude
+                }}
+                title={station.station_name}
+                description={`PM Status: ${station.status?.status_pm}`}
+              />
+            ) : null // Do not render the marker if coordinates are invalid
           ))}
 
-          <Heatmap
+          {statusPoly.map((station) => (
+            <Polygon
+              key={station.id}
+              coordinates={station.coordinates} // ใช้พิกัดที่ได้จาก Firestore
+              strokeColor="#000" // สีขอบของ Polygon
+              fillColor={
+                station.status ?
+                  (station.status.status_pm < 10 ? 'rgba(2, 174, 238, 0.5)' : // ฟ้า (PM < 10)
+                    station.status.status_pm >= 10 && station.status.status_pm < 15 ? 'rgba(50, 182, 72, 0.5)' : // เขียว (10 <= PM < 15)
+                      station.status.status_pm >= 15 && station.status.status_pm < 20 ? 'rgba(253, 252, 1, 0.5)' : // เหลือง (15 <= PM < 20)
+                        station.status.status_pm >= 20 && station.status.status_pm < 25 ? 'rgba(243, 113, 53, 0.5)' : // ส้ม (20 <= PM < 25)
+                          'rgba(236, 29, 37, 0.5)') // แดง (PM >= 25)
+                  : 'gray' // หากไม่มีข้อมูล PM ให้แสดงสีเทาon.status.status_pm > 10 ? '#02AEEE' : 'gray')
 
-            points={points}
-            radius={50} // Adjust radius to control the spread of the heatmap
-            opacity={0.6} // Adjust opacity for visibility
-            gradient={{
-              colors: ['#00ff00', '#ffff00', '#ff0000'],
-              startPoints: [0.1, 0.5, 1.0,],
-              colorMapSize: 256,
-            }}
-          >
+              } // สีเติมภายใน Polygon
+              strokeWidth={0.001} // ความหนาของขอบ
+            />
+          ))}
 
-          </Heatmap>
+
+
 
 
         </MapView>
@@ -531,16 +763,6 @@ const Details = ({ route }) => {
             </View>
           </Animated.View>
         )}
-
-
-
-
-
-
-
-
-
-
 
       </View>
 

@@ -1,5 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+
+
 
 // firebase.js
 import firebase from '@react-native-firebase/app';
@@ -19,6 +22,11 @@ const firebaseConfig = {
     appId: "1:307910444889:web:e4dabdb09f92313b84ae48",
     measurementId: "G-92DGS1EBSQ"
   };
+
+// if (!firebase.apps.length) {
+//   firebase.initializeApp(firebaseConfig);
+// }
+
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
