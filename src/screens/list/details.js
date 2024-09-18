@@ -1,4 +1,4 @@
-import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView } from 'react-native'
+import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView,  ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useRef, useRoute } from 'react'
 
 import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, Polygon, Polyline, Circle } from 'react-native-maps';
@@ -38,12 +38,38 @@ import { addDays, format } from 'date-fns'; // ใช้ date-fns เพื่�
 
 
 
+ const getMapRegion = (stations) => {
+  if (stations.length === 0) return null;
+
+  const latitudes = stations.map(station => station.latitude);
+  const longitudes = stations.map(station => station.longitude);
+
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+
+  // Calculate the center of the bounding box
+  const latitude = (minLatitude + maxLatitude) / 2;
+  const longitude = (minLongitude + maxLongitude) / 2;
+
+  // Calculate the delta (size) of the bounding box
+  const latitudeDelta = maxLatitude - minLatitude + 0.05; // Added padding
+  const longitudeDelta = maxLongitude - minLongitude + 0.04; // Added padding
+
+
+
+  return {
+    latitude,
+    longitude,
+    latitudeDelta,
+    longitudeDelta,
+  };
+};
+
 const Details = ({ route }) => {
 
   const { stations } = route.params;
-
-
-  // const { station_codinates, stations } = route.params || {};
 
 
   const [lineData1, setLinedata1] = useState([])
@@ -52,24 +78,20 @@ const Details = ({ route }) => {
   const [statusPoly, setStatusPoly] = useState([])
   const [stationmaker, setStationmarker] = useState([])
 
-  const [polygonCoordinates, setPolygonCoordinates] = useState([]);
-
+  const [region, setRegion] = useState(null);
 
 
   const [loading, setLoading] = useState(true);
 
-  
+
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // const [stations, setStations] = useState([]);
-  const [statusStation, setStatusStation] = useState([]);
-
   const labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
   const labels_month = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
 
-
+  const [label_dy, setLabels] = useState([]);
 
   const chartData = {
     labels: labels,
@@ -82,7 +104,7 @@ const Details = ({ route }) => {
   };
 
   const chartData2 = {
-    labels: labels,
+    labels: label_dy,
     datasets: [
       {
         data: lineData1, // Your data for 30 days
@@ -109,8 +131,10 @@ const Details = ({ route }) => {
   });
 
 
-
-
+  useEffect(() => {
+    const newRegion = getMapRegion(stationmaker);
+    setRegion(newRegion);
+  }, [stationmaker]);
 
   //get data details 
   // useEffect(() => {
@@ -208,6 +232,59 @@ const Details = ({ route }) => {
   //   fetchData();
   // }, [stations]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       if (!stations || !stations.id) {
+  //         console.error('No station ID found in route parameters');
+  //         return;
+  //       }
+
+  //       const stationDocRef = firestore()
+  //         .collection('station_realair')
+  //         .doc(stations.id);
+
+  //       const currentDate = new Date();
+  //       const sevenDaysAgo = addDays(currentDate, -7);
+
+  //       const subcollectionSnapshot = await stationDocRef
+  //         .collection('status')
+  //         .where('status_datestamp', '>=', sevenDaysAgo)
+  //         .orderBy('status_datestamp', 'desc')
+  //         .get();
+
+  //       let aggregatedData = [];
+
+  //       subcollectionSnapshot.docs.forEach((subDoc) => {
+  //         const subDocData = subDoc.data();
+  //         if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
+  //           aggregatedData.push({
+  //             date: subDocData.status_datestamp.toDate(),
+  //             pmValue: subDocData.status_pm,
+  //           });
+  //         }
+  //       });
+
+  //       if (aggregatedData.length === 0) {
+  //         aggregatedData = [{ date: currentDate, pmValue: 0 }];
+  //       }
+
+  //       // Ensure that these variables are defined
+  //       const formattedLabels = aggregatedData.map(item => item.date.toLocaleDateString());
+  //       const formattedData = aggregatedData.map(item => item.pmValue);
+
+  //       // Set state with formatted data
+  //       setLabels(formattedLabels);
+  //       setLinedata1(formattedData);
+
+  //     } catch (error) {
+  //       console.error('Error fetching Firestore data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [stations]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -245,7 +322,14 @@ const Details = ({ route }) => {
           aggregatedData = [{ date: currentDate, pmValue: 0 }];
         }
 
-        setLinedata1(aggregatedData);
+        // Format the date to show only day and month
+        const formattedLabels = aggregatedData.map(item =>
+          item.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+        );
+        const formattedData = aggregatedData.map(item => item.pmValue);
+
+        setLabels(formattedLabels);
+        setLinedata1(formattedData);
 
       } catch (error) {
         console.error('Error fetching Firestore data:', error);
@@ -254,7 +338,6 @@ const Details = ({ route }) => {
 
     fetchData();
   }, [stations]);
-
 
   // useEffect(() => {
   //   const fetchStationsAndStatus = async () => {
@@ -635,8 +718,18 @@ const Details = ({ route }) => {
           chartConfig={chartConfig}
           line
         />
+
       </View>
 
+    );
+  }
+
+  if (loading) {
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
     );
   }
 
@@ -651,12 +744,7 @@ const Details = ({ route }) => {
         <MapView
           provider={PROVIDER_GOOGLE} // remove if not using Google Maps
           style={styles.map}
-          region={{
-            latitude: 14.881474,
-            longitude: 102.015555,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.04,
-          }}
+          region={region}
         >
 
 

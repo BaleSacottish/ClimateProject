@@ -1,8 +1,8 @@
-import { View, SafeAreaView, StyleSheet, Text, forwardRef, Platform } from 'react-native'
+import { View, SafeAreaView, StyleSheet, Text, forwardRef, Platform,Animated,  ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 
 import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, Polygon, Polyline, Circle } from 'react-native-maps';
-import { Svg, Path } from 'react-native-svg';
+
 
 import globalStyles from '../../contanst/globalStyle'
 import colors from '../../contanst/colors'
@@ -14,162 +14,6 @@ import { firebase, firestore } from '../db/config'
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 
 
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    height: 400,
-    width: 400,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-});
-
-const isoplethPolygonCoordinates = [
-  { latitude: 14.8952927517974, longitude: 101.9948 },
-  { latitude: 14.8907935571532, longitude: 101.9948 },
-  { latitude: 14.8862943625091, longitude: 101.9948 },
-
-  { latitude: 14.8817951678649, longitude: 101.9948 },
-  { latitude: 14.8727967785766, longitude: 102.008297583932 },
-  { latitude: 14.8727967785766, longitude: 102.012796778576 },
-
-  { latitude: 14.8682975839324, longitude: 102.01729597322 },
-  { latitude: 14.8682975839324, longitude: 102.021795167864 },
-  { latitude: 14.8637983892883, longitude: 102.026294362509 },
-
-  { latitude: 14.8592991946441, longitude: 102.035292751797 },
-  { latitude: 14.8592991946441, longitude: 102.039791946441 },
-  { latitude: 14.8637983892883, longitude: 102.039791946441 },
-  { latitude: 14.8727967785766, longitude: 102.039791946441 },
-  { latitude: 14.8727967785766, longitude: 102.035292751797 },
-  { latitude: 14.8727967785766, longitude: 102.030793557153 },
-  { latitude: 14.8817951678649, longitude: 102.026294362509 },
-  { latitude: 14.8772959732207, longitude: 102.026294362509 },
-  { latitude: 14.8862943625091, longitude: 102.021795167864 },
-  { latitude: 14.8907935571532, longitude: 102.01729597322 },
-  { latitude: 14.8952927517974, longitude: 102.01729597322 },
-  { latitude: 14.8952927517974, longitude: 102.012796778576 },
-  { latitude: 14.8952927517974, longitude: 102.008297583932 },
-  { latitude: 14.8952927517974, longitude: 102.003798389288 },
-  { latitude: 14.8952927517974, longitude: 101.999299194644 },
-];
-
-const isoplethPolygonCoordinates1 = [
-  { latitude: 14.86829758, longitude: 102.0352928 },
-  { latitude: 14.86379839, longitude: 102.0397919 },
-  { latitude: 14.8592991946441, longitude: 102.039791946441 },
-  { latitude: 14.8592991946441, longitude: 102.035292751797 },
-  { latitude: 14.86379839, longitude: 102.0307936 },
-  { latitude: 14.8637983892883, longitude: 102.035292751797 },
-];
-
-const isoplethPolygonCoordinates2 = [
-  { latitude: 14.8952927517974, longitude: 102.01729597322 },
-  { latitude: 14.8907935571532, longitude: 102.012796778576 },
-
-  { latitude: 14.88629436, longitude: 102.0082946 },
-  { latitude: 14.88629436, longitude: 102.0127968 },
-
-  { latitude: 14.88629436, longitude: 102.017296 },
-  { latitude: 14.88629436, longitude: 102.0217952 },
-  { latitude: 14.89079356, longitude: 102.017296 },
-];
-
-const isoplethPolygonCoordinates3 = [
-  { latitude: 14.89529275, longitude: 101.9948 },
-  { latitude: 14.8952927517974, longitude: 102.01729597322 },
-
-  { latitude: 14.88629436, longitude: 102.0082946 },
-  { latitude: 14.88629436, longitude: 101.9948 },
-
-];
-
-const isoplethPolygonCoordinates4 = [
-  { latitude: 14.8952927517974, longitude: 102.003798389288 },
-  { latitude: 14.88629436, longitude: 101.9948 },
-  { latitude: 14.88629436, longitude: 102.0037984 },
-];
-
-const isoplethPolygonCoordinates5 = [
-  { latitude: 14.88629436, longitude: 101.9948 },
-  { latitude: 14.87729597, longitude: 101.9992992 },
-  { latitude: 14.87279678, longitude: 102.0082976 },
-
-  { latitude: 14.87279678, longitude: 102.0127968 },
-  { latitude: 14.87729597, longitude: 102.0082976 },
-  { latitude: 14.88629436, longitude: 102.0037984 },
-
-
-];
-
-const isoplethPolygonCoordinates6 = [
-  { latitude: 14.8592991946441, longitude: 102.035292751797 },
-  { latitude: 14.8637983892883, longitude: 102.026294362509 },
-  { latitude: 14.86829758, longitude: 102.0217952 },
-
-  { latitude: 14.86829758, longitude: 102.02624944 },
-  { latitude: 14.86829758, longitude: 102.03 },
-  { latitude: 14.86379839, longitude: 102.0307936 },
-
-
-
-
-
-];
-const isoplethPolygonCoordinates7 = [
-  { latitude: 14.86829758, longitude: 102.03 },
-
-  { latitude: 14.87279678, longitude: 102.0307936 },
-  { latitude: 14.87279678, longitude: 102.0262944 },
-
-  { latitude: 14.87279678, longitude: 102.0217952 },
-
-  { latitude: 14.86829758, longitude: 102.0217952 },
-  { latitude: 14.86829758, longitude: 102.02624944 },
-
-];
-const isoplethPolygonCoordinates8 = [
-  { latitude: 14.87279678, longitude: 102.0127968 },
-
-  { latitude: 14.87279678, longitude: 102.017296 },
-
-
-  { latitude: 14.87279678, longitude: 102.0217952 },
-
-  { latitude: 14.86829758, longitude: 102.0217952 },
-  { latitude: 14.86829758, longitude: 102.017296 },
-
-];
-
-const isoplethPolygonCoordinates9 = [
-  { latitude: 14.86829758, longitude: 102.0352928 },
-  { latitude: 14.86379839, longitude: 102.0352928 },
-
-  { latitude: 14.86379839, longitude: 102.0307936 },
-  { latitude: 14.86829758, longitude: 102.0307936 },
-
-  { latitude: 14.87279678, longitude: 102.0307936 },
-
-  { latitude: 14.87279678, longitude: 102.0397919 },
-  { latitude: 14.86379839, longitude: 102.0397919 },
-
-];
-const isoplethPolygonCoordinates10 = [
-  { latitude: 14.87279678, longitude: 102.0307936 },
-  { latitude: 14.88179517, longitude: 102.0262944 },
-
-  { latitude: 14.88629436, longitude: 102.0217952 },
-  { latitude: 14.88629436, longitude: 102.0127968 },
-
-  { latitude: 14.88179517, longitude: 102.017296 },
-
-  { latitude: 14.87279678, longitude: 102.0217952 },
-
-
-];
 
 
 
@@ -178,6 +22,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
   const [stations, setStations] = useState([]);
   const [stationmaker, setStationmarker] = useState([])
   const [loading, setLoading] = useState(true);
+
 
   const [zonestatus1, setZonestatus1] = useState([]);
   const [zonestatus2, setZonestatus2] = useState([]);
@@ -189,16 +34,9 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
   const [zonestatus8, setZonestatus8] = useState([]);
   const [zonestatus9, setZonestatus9] = useState([]);
   const [zonestatus10, setZonestatus10] = useState([]);
+  const [zonestatus11, setZonestatus11] = useState([]);
 
-  const getColor = (pm25) => {
-    const value = parseFloat(pm25);
-    if (isNaN(value)) return '#02AEEE'; // Default color if PM2.5 is not a number
-    if (value < 10) return '#02AEEE'; // Blue
-    if (value > 10 && value <= 15) return '#32B648';
-    if (value > 15 && value <= 20) return '#FDFC01';
-    if (value > 20 && value <= 25) return '#F37135';
-    return '#EC1D25'; // Red
-  };
+
 
   // useEffect(() => {
   //   const fetchStationsAndStatus = async () => {
@@ -307,9 +145,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
     longitudeDelta: 0.04,
   };
 
-
- 
-
+  // marker
   useEffect(() => {
     const fetchStationsAndStatus = async () => {
       try {
@@ -367,13 +203,80 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
 
       } catch (error) {
         console.error('Error fetching stations and status: ', error);
-      } finally {
-        setLoading(false); // ซ่อน loading indicator เมื่อข้อมูลโหลดเสร็จ
       }
+      finally {
+            setLoading(false); // Hide loading indicator when data is loaded
+          }
     };
 
     fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
   }, []);
+
+
+  // useEffect(() => {
+  //   const fetchStationsAndStatus = async () => {
+  //     try {
+  //       // ดึงข้อมูลจาก collection 'station_realair'
+  //       const stationCollection = await firestore().collection('station_realair').get();
+
+  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
+  //         const stationData = doc.data();
+
+  //         // Query เพื่อดึงสถานะล่าสุดจาก subcollection 'status'
+  //         const statusSnapshot = await firestore()
+  //           .collection('station_realair')
+  //           .doc(doc.id)
+  //           .collection('status')
+  //           .orderBy('status_datestamp', 'desc') // เรียงตามสถานะล่าสุด
+  //           .limit(1) // จำกัดให้ดึงเพียง 1 document
+  //           .get();
+
+  //         const statusData = statusSnapshot.docs.map(subDoc => {
+  //           const status = subDoc.data();
+
+  //           // แปลง status_datestamp ที่เป็น Firestore Timestamp ให้เป็น Date
+  //           const status_datestamp = status.status_datestamp.toDate();
+
+  //           return {
+  //             id: subDoc.id,
+  //             ...status,
+  //             status_datestamp: status_datestamp.toLocaleString() // แปลง Date เป็น string
+  //           };
+  //         });
+
+  //         // ตรวจสอบข้อมูลตำแหน่ง
+  //         const cordinates = stationData.station_codinates;
+
+  //         if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
+  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
+  //           return null;
+  //         }
+
+  //         return {
+  //           id: doc.id,
+  //           station_name: stationData.station_name,
+  //           latitude: cordinates.latitude,
+  //           longitude: cordinates.longitude,
+  //           status: statusData.length > 0 ? statusData[0] : null // ถ้ามีสถานะ ใช้ statusData[0]
+  //         };
+  //       });
+
+  //       const stationsWithDetails = await Promise.all(stationListPromises);
+
+  //       // Filter out null values
+  //       const validStations = stationsWithDetails.filter(station => station !== null);
+
+  //       setStationmarker(validStations);
+
+  //     } catch (error) {
+  //       console.error('Error fetching stations and status: ', error);
+  //     } finally {
+  //       setLoading(false); // ซ่อน loading indicator เมื่อข้อมูลโหลดเสร็จ
+  //     }
+  //   };
+
+  //   fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
+  // }, []);
 
   // polygonColor
 
@@ -516,628 +419,109 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
 
   // Determine the color based on status_pm
 
- function generatePolygonCoordinates(center, radiusInMeters, numPoints = 6) {
-    const coordinates = [];
-    const angleStep = (2 * Math.PI) / numPoints;
+  
+  
+  const fetchStationsAndStatus = async (stationIds, setters) => {
+    try {
+      // Create an array of promises to fetch data for each station ID
+      const fetchPromises = stationIds.map(async ({ id, setter }) => {
+        const stationCollection = await firestore().collection('station_realair').get();
 
-    for (let i = 0; i < numPoints; i++) {
-      const angle = i * angleStep;
-      const xOffset = radiusInMeters * Math.cos(angle);
-      const yOffset = radiusInMeters * Math.sin(angle);
+        const stationListPromises = stationCollection.docs.map(async (doc) => {
+          const stationData = doc.data();
 
-      // Convert offsets to latitude and longitude (assumes small distances)
-      const latOffset = xOffset / 111320; // Approximate conversion from meters to latitude
-      const lngOffset = yOffset / (111320 * Math.cos(center.latitude * (Math.PI / 180))); // Approximate conversion
+          const statusSnapshot = await firestore()
+            .collection('station_realair')
+            .doc(id)
+            .collection('status')
+            .orderBy('status_datestamp', 'desc')
+            .limit(1)
+            .get();
 
-      coordinates.push({
-        latitude: center.latitude + latOffset,
-        longitude: center.longitude + lngOffset
+          const statusData = statusSnapshot.docs.map(subDoc => {
+            const status = subDoc.data();
+            const status_datestamp = status.status_datestamp.toDate();
+            return {
+              id: subDoc.id,
+              ...status,
+              status_datestamp: status_datestamp.toLocaleString()
+            };
+          });
+
+          const coordinates = stationData.station_codinates;
+
+          if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
+            console.error(`Invalid or missing coordinates for document ${doc.id}`);
+            return null;
+          }
+
+          return {
+            id: doc.id,
+            station_name: stationData.station_name,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            status: statusData.length > 0 ? statusData[0] : null
+          };
+        });
+
+        const stationsWithDetails = await Promise.all(stationListPromises);
+        const validStations = stationsWithDetails.filter(station => station !== null);
+
+        // Update the respective state
+        setter(validStations);
       });
+
+      await Promise.all(fetchPromises);
+    } catch (error) {
+      console.error('Error fetching stations and status: ', error);
+    } finally {
+      setLoading(false); // Hide loading indicator when data is loaded
     }
-
-    return coordinates;
-  }
-  // // Zone1
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('XXAmTY4YV5zDLtbCK0Z7')
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus1(validStations);
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone2
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('klx7b9neRfTaVJBSU82N') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus2(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone3
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('DxgbNH6cyUaePrhRczpT') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus3(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone4
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('VZIJIRdEjjjlCEJCn1fi') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus4(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone5
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('JL25tJDmw2a6kF6pVVAn') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus5(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone6
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('fXgV3ELF2nA6l8wGi7If') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus6(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone7
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('6SHNRZf1D1n7BcuAR4py') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus7(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-  // // Zone8
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('hUcheViR4agNhkx4k8Pa') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus8(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone9
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('Gtco7rRPvZXYHadniwPw') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus9(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // // Zone10
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc('y2CzpLPtpagoU6f3yzeV') //station 1
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: coordinates.latitude,
-  //           longitude: coordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setZonestatus10(validStations);
-  //       // console.log(zonestatus1)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
+  };
+
+  useEffect(() => {
+    // Define the list of zone IDs and their respective state setters
+    const stationIds = [
+      { id: 'XXAmTY4YV5zDLtbCK0Z7', setter: setZonestatus1 },  // Zone 1
+      { id: 'klx7b9neRfTaVJBSU82N', setter: setZonestatus2 },  // Zone 2
+      { id: 'FZaowBdWAO1LNpK3fG7U', setter: setZonestatus3 },  // Zone 3
+      { id: 'VZIJIRdEjjjlCEJCn1fi', setter: setZonestatus4 },  // Zone 4
+      { id: 'DnoaGJyS4B7kq3i9gduz', setter: setZonestatus4 },  // Zone 4
+      { id: '6SHNRZf1D1n7BcuAR4py', setter: setZonestatus5 },  // Zone 5
+      { id: 'L0gJJwgn8egnc5j3Z3QG', setter: setZonestatus6 },  // Zone 6
+      { id: 'gWI7GA7nv5zB8tGXNNRn', setter: setZonestatus7 },  // Zone 7
+      { id: 'hUcheViR4agNhkx4k8Pa', setter: setZonestatus8 },  // Zone 8
+      { id: 'CUxU9GTgcane7rKLTtMT', setter: setZonestatus9 },  // Zone 9
+      { id: 'EXb1fYqJtYk9yUZlJFIR', setter: setZonestatus10 }, // Zone 10
+      { id: 'fXgV3ELF2nA6l8wGi7If', setter: setZonestatus11 }  // Zone 11
+    ];
+
+    fetchStationsAndStatus(stationIds, [
+      setZonestatus1, setZonestatus2, setZonestatus3, setZonestatus4, setZonestatus5,
+      setZonestatus6, setZonestatus7, setZonestatus8, setZonestatus9, setZonestatus10, setZonestatus11
+    ]);
+  }, []);
 
   const getColorBasedOnStatusPm = (statusPm) => {
 
 
-    if (statusPm < 10) return `rgba(2, 174, 238, 0.4)`;
-    if (statusPm >= 10 && statusPm < 15) return `rgba(50, 182, 72, 0.5)`;
-    if (statusPm >= 15 && statusPm < 20) return `rgba(253, 252, 1, 0.5)`;
-    if (statusPm >= 20 && statusPm < 25) return `rgba(2243, 113, 53, 0.5)`;
-    return `rgba(236, 29, 37,0.5)`;
+    if (statusPm < 10) return `rgba(2, 174, 238, 0.01)`;
+    if (statusPm >= 10 && statusPm < 15) return `rgba(50, 182, 72, 0.01)`;
+    if (statusPm >= 15 && statusPm < 20) return `rgba(253, 252, 1, 0.01)`;
+    if (statusPm >= 20 && statusPm < 25) return `rgba(243, 113, 53, 0.01)`;
+    return `rgba(236, 29, 37,0.01)`;
   };
 
 
 
+  if (loading) {
 
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
+  }
 
 
 
@@ -1155,9 +539,6 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
         >
 
 
-
-
-
           {stationmaker.map((station) => (
             <Marker
               key={station.id}
@@ -1173,50 +554,11 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
           ))}
 
 
-          {/* {stations.map((station) => (
-            <Polygon
-              key={station.id}
-              coordinates={station.coordinates} // ใช้พิกัดที่ได้จาก Firestore
-              strokeColor="#000" // สีขอบของ Polygon
-              fillColor={
-                station.status ?
-                  (station.status.status_pm < 10 ? 'rgba(2, 174, 238, 0.5)' : // ฟ้า (PM < 10)
-                    station.status.status_pm >= 10 && station.status.status_pm < 15 ? 'rgba(50, 182, 72, 0.5)' : // เขียว (10 <= PM < 15)
-                      station.status.status_pm >= 15 && station.status.status_pm < 20 ? 'rgba(253, 252, 1, 0.5)' : // เหลือง (15 <= PM < 20)
-                        station.status.status_pm >= 20 && station.status.status_pm < 25 ? 'rgba(243, 113, 53, 0.5)' : // ส้ม (20 <= PM < 25)
-                          'rgba(236, 29, 37, 0.5)') // แดง (PM >= 25)
-                  : 'gray' // หากไม่มีข้อมูล PM ให้แสดงสีเทาon.status.status_pm > 10 ? '#02AEEE' : 'gray')
 
-              } // สีเติมภายใน Polygon
-              strokeWidth={0.001} // ความหนาของขอบ
-            />
-          ))} */}
-
-          <Polygon
-            coordinates={isoplethPolygonCoordinates}
-            strokeColor="#000" // Polygon border color
-            fillColor="rgba(2, 174, 238, 1)" // Polygon fill color
-            strokeWidth={0.01} // Polygon border width
-          />
-
-          {/* {stations.map(station => (
-            <Polygon
-              key={station.id}
-              coordinates={isoplethPolygonCoordinates2}
-              strokeColor="#000" // Polygon border color
-              fillColor={polygonColor} // Polygon fill color
-              strokeWidth={0.01} // Polygon border width
-            />
-          ))} */}
-
-
-
-          {/* {zonestatus1.map(station => {
+          {zonestatus1.map(station => {
             const { status } = station;
             if (status) {
               const color = getColorBasedOnStatusPm(status.status_pm);
-
-
               return (
                 <Polygon
                   key={station.id}
@@ -1240,7 +582,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates2}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1257,7 +599,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates3}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1275,7 +617,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates4}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1292,7 +634,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates5}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1309,7 +651,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates6}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1326,7 +668,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates7}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1343,7 +685,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates8}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1360,7 +702,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates9}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
@@ -1377,12 +719,30 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
                   coordinates={isoplethPolygonCoordinates10}
                   strokeColor={color}
                   fillColor={color}
-                  strokeWidth={2}
+                  strokeWidth={0.2}
                 />
               );
             }
             return null;
-          })} */}
+          })}
+
+          {zonestatus11.map(station => {
+            const { status } = station;
+            if (status) {
+              const color = getColorBasedOnStatusPm(status.status_pm);
+              return (
+                <Polygon
+                  key={station.id}
+                  coordinates={isoplethPolygonCoordinates11}
+                  strokeColor={color}
+                  fillColor={color}
+                  strokeWidth={0.2}
+                />
+              );
+            }
+            return null;
+          })}
+
 
 
 
@@ -1402,3 +762,155 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
 export default Mapiso
 
 
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    height: 400,
+    width: 400,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    marginTop: 50,
+  },
+  webview: {
+    flex: 1,
+  },
+});
+
+
+const isoplethPolygonCoordinates1 = [
+  { latitude: 14.86829758, longitude: 102.0352928 },
+  { latitude: 14.86379839, longitude: 102.0397919 },
+  { latitude: 14.8592991946441, longitude: 102.039791946441 },
+  { latitude: 14.8592991946441, longitude: 102.035292751797 },
+  { latitude: 14.86379839, longitude: 102.0307936 },
+  { latitude: 14.8637983892883, longitude: 102.035292751797 },
+];
+
+const isoplethPolygonCoordinates2 = [
+  { latitude: 14.8952927517974, longitude: 102.01729597322 },
+  { latitude: 14.8907935571532, longitude: 102.012796778576 },
+
+  { latitude: 14.88629436, longitude: 102.0082946 },
+  { latitude: 14.88629436, longitude: 102.0127968 },
+
+  { latitude: 14.88629436, longitude: 102.017296 },
+  { latitude: 14.88629436, longitude: 102.0217952 },
+  { latitude: 14.89079356, longitude: 102.017296 },
+];
+
+const isoplethPolygonCoordinates3 = [
+  { latitude: 14.89529275, longitude: 101.9948 },
+  { latitude: 14.8952927517974, longitude: 102.01729597322 },
+
+  { latitude: 14.88629436, longitude: 102.0082946 },
+  { latitude: 14.88629436, longitude: 101.9948 },
+
+];
+
+const isoplethPolygonCoordinates4 = [
+  { latitude: 14.8952927517974, longitude: 102.003798389288 },
+  { latitude: 14.88629436, longitude: 101.9948 },
+  { latitude: 14.88629436, longitude: 102.0037984 },
+];
+
+const isoplethPolygonCoordinates5 = [
+  { latitude: 14.88629436, longitude: 101.9948 },
+  { latitude: 14.87729597, longitude: 101.9992992 },
+  { latitude: 14.87279678, longitude: 102.0082976 },
+
+  { latitude: 14.87279678, longitude: 102.0127968 },
+
+  { latitude: 14.88179517, longitude: 102.0082976 },
+  { latitude: 14.88629436, longitude: 102.0037984 },
+
+
+];
+
+const isoplethPolygonCoordinates6 = [
+  { latitude: 14.8592991946441, longitude: 102.035292751797 },
+  { latitude: 14.8637983892883, longitude: 102.026294362509 },
+  { latitude: 14.86829758, longitude: 102.0217952 },
+
+  { latitude: 14.86829758, longitude: 102.02624944 },
+  { latitude: 14.86829758, longitude: 102.0307936 },
+  { latitude: 14.86379839, longitude: 102.0307936 },
+
+
+
+
+
+];
+const isoplethPolygonCoordinates7 = [
+  { latitude: 14.86829758, longitude: 102.0307936 },
+
+  { latitude: 14.87279678, longitude: 102.0307936 },//19
+
+  { latitude: 14.87279678, longitude: 102.0262944 },
+
+  { latitude: 14.87279678, longitude: 102.0217952 },
+
+  { latitude: 14.86829758, longitude: 102.0217952 },
+  { latitude: 14.86829758, longitude: 102.02624944 },
+
+];
+const isoplethPolygonCoordinates8 = [
+  { latitude: 14.87279678, longitude: 102.0127968 },
+
+  { latitude: 14.87279678, longitude: 102.017296 },
+
+
+  { latitude: 14.87279678, longitude: 102.0217952 },
+
+  { latitude: 14.86829758, longitude: 102.0217952 },
+  { latitude: 14.86829758, longitude: 102.017296 },
+
+];
+
+const isoplethPolygonCoordinates9 = [
+  { latitude: 14.86829758, longitude: 102.0352928 },
+  { latitude: 14.86379839, longitude: 102.0352928 },
+
+  { latitude: 14.86379839, longitude: 102.0307936 },
+
+  { latitude: 14.86829758, longitude: 102.0307936 },
+  { latitude: 14.87279678, longitude: 102.0307936 },
+
+  { latitude: 14.87279678, longitude: 102.0397919 },
+  { latitude: 14.86379839, longitude: 102.0397919 },
+
+];
+const isoplethPolygonCoordinates10 = [
+  { latitude: 14.87279678, longitude: 102.0307936 },
+  { latitude: 14.88179517, longitude: 102.0262944 },
+
+  { latitude: 14.88629436, longitude: 102.0217952 },
+  { latitude: 14.88629436, longitude: 102.0127968 },
+
+  { latitude: 14.88179517, longitude: 102.0127968 },
+
+  { latitude: 14.87279678, longitude: 102.0217952 },
+
+
+];
+const isoplethPolygonCoordinates11 = [
+  { latitude: 14.88629436, longitude: 102.0127968 },
+  { latitude: 14.88179517, longitude: 102.0217952 },
+
+  { latitude: 14.87279678, longitude: 102.0217952 },
+  { latitude: 14.87279678, longitude: 102.0127968 },
+
+  { latitude: 14.88179517, longitude: 102.0082976 },
+  { latitude: 14.88629436, longitude: 102.0037984 },
+];
