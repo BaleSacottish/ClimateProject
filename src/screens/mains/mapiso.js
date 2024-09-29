@@ -1,17 +1,42 @@
-import { View, SafeAreaView, StyleSheet, Text, forwardRef, Platform,Animated,  ActivityIndicator } from 'react-native'
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Animated,
+  Image,
+  Button,
+  Linking,
+  Alert,
+  Modal,
+  TouchableOpacity,
+  Easing,
+  Text
+} from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 
-import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, Polygon, Polyline, Circle } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker, Polygon, } from 'react-native-maps';
+import WebView from 'react-native-webview';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import globalStyles from '../../contanst/globalStyle'
 import colors from '../../contanst/colors'
 
-import { demoData } from '../db/demo';
+import Feather from 'react-native-vector-icons/Feather'
 
 // import firestore from '@react-native-firebase/firestore';
 import { firebase, firestore } from '../db/config'
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+// import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+
+
+
+// ฟังก์ชันสุ่มค่า status_pm
+const getRandomStatusPm = () => {
+  const min = 0;  // ค่าต่ำสุดของ PM 2.5
+  const max = 50; // ค่าสูงสุดของ PM 2.5
+  return (Math.random() * (max - min) + min).toFixed(2); // ส่งคืนเป็นทศนิยม 2 ตำแหน่ง
+};
+
 
 
 
@@ -19,420 +44,57 @@ import { collection, getDocs, query, where, orderBy, limit } from 'firebase/fire
 
 const Mapiso = ({ navigation, latitude, longitude }) => {
 
-  const [stations, setStations] = useState([]);
-  const [stationmaker, setStationmarker] = useState([])
+
   const [loading, setLoading] = useState(true);
 
 
   const [zonestatus1, setZonestatus1] = useState([]);
   const [zonestatus2, setZonestatus2] = useState([]);
-  const [zonestatus3, setZonestatus3] = useState([]);
-  const [zonestatus4, setZonestatus4] = useState([]);
-  const [zonestatus5, setZonestatus5] = useState([]);
-  const [zonestatus6, setZonestatus6] = useState([]);
-  const [zonestatus7, setZonestatus7] = useState([]);
-  const [zonestatus8, setZonestatus8] = useState([]);
-  const [zonestatus9, setZonestatus9] = useState([]);
-  const [zonestatus10, setZonestatus10] = useState([]);
-  const [zonestatus11, setZonestatus11] = useState([]);
 
 
 
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // Fetch data from 'station_realair' collection
-  //       const stationCollection = await firestore().collection('station_realair').get();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         // Query to get the latest status from 'status' subcollection
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // Order by latest status
-  //           .limit(1) // Limit to 1 document
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // Convert status_datestamp from Firestore Timestamp to Date
-  //           const status_datestamp = status.status_datestamp.toDate();
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
-  //           };
-  //         });
-
-  //         // Verify coordinate data
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           coordinates: coordinates, // No need to generate separate polygons now
-  //           status: statusData.length > 0 ? statusData[0] : null // Use latest status
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       // Filter out null values
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       // Collect coordinates from all valid stations for a single polygon
-  //       const polygonCoordinates = validStations.map(station => ({
-  //         latitude: station.coordinates.latitude,
-  //         longitude: station.coordinates.longitude,
-  //       }));
-
-  //       setPolygon(polygonCoordinates); // Set collected coordinates as the polygon
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // Hide loading indicator when data is loaded
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // Call function on component mount
-  // }, []);
-
-
-
-  // const generatePolygonCoordinates = (center, radiusInMeters, numSides = 36) => {
-  //   const coordinates = [];
-  //   const angleStep = (2 * Math.PI) / numSides; // Angle between each vertex
-
-  //   // Convert radius from meters to degrees
-  //   const radiusLat = radiusInMeters / 111320; // Latitude degrees
-  //   const radiusLng = radiusInMeters / (111320 * Math.cos(center.latitude * (Math.PI / 180))); // Longitude degrees
-
-  //   for (let i = 0; i < numSides; i++) {
-  //     const angle = i * angleStep;
-  //     const latOffset = radiusLat * Math.cos(angle);
-  //     const lngOffset = radiusLng * Math.sin(angle);
-
-  //     coordinates.push({
-  //       latitude: center.latitude + latOffset,
-  //       longitude: center.longitude + lngOffset,
-  //     });
-  //   }
-
-  //   return coordinates;
-  // };
-
-
-
-  // marker and colort
-
-  //defalt position
-
-  const initialRegion = {
-    latitude: 14.881474,
-    longitude: 102.015555,
-    latitudeDelta: 0.04,
-    longitudeDelta: 0.04,
+  const toggleFilter = () => {
+    setIsFilterVisible(!isFilterVisible);
+    Animated.timing(slideAnim, {
+      toValue: isFilterVisible ? 0 : 1, // slide up if visible, down if hidden
+      duration: 300, // animation duration
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: false, // Native driver for non-layout properties
+    }).start();
   };
 
-  // marker
-  useEffect(() => {
-    const fetchStationsAndStatus = async () => {
-      try {
-        // ดึงข้อมูลจาก collection 'station_realair'
-        const stationCollection = await firestore().collection('station_realair').get();
+  const openMap = () => {
+    setModalVisible(true);
+  };
 
-        const stationListPromises = stationCollection.docs.map(async (doc) => {
-          const stationData = doc.data();
+  const closeMap = () => {
+    setModalVisible(false);
+  };
 
-          // Query เพื่อดึงสถานะล่าสุดจาก subcollection 'status'
-          const statusSnapshot = await firestore()
-            .collection('station_realair')
-            .doc(doc.id)
-            .collection('status')
-            .orderBy('status_datestamp', 'desc') // เรียงตามสถานะล่าสุด
-            .limit(1) // จำกัดให้ดึงเพียง 1 document
-            .get();
-
-          const statusData = statusSnapshot.docs.map(subDoc => {
-            const status = subDoc.data();
-
-            // แปลง status_datestamp ที่เป็น Firestore Timestamp ให้เป็น Date
-            const status_datestamp = status.status_datestamp.toDate();
-
-            return {
-              id: subDoc.id,
-              ...status,
-              status_datestamp: status_datestamp.toLocaleString() // แปลง Date เป็น string
-            };
-          });
-
-          // ตรวจสอบข้อมูลตำแหน่ง
-          const cordinates = stationData.station_codinates;
-
-          if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
-            console.error(`Invalid or missing coordinates for document ${doc.id}`);
-            return null;
-          }
-
-          return {
-            id: doc.id,
-            station_name: stationData.station_name,
-            latitude: cordinates.latitude,
-            longitude: cordinates.longitude,
-            status: statusData.length > 0 ? statusData[0] : null // ถ้ามีสถานะ ใช้ statusData[0]
-          };
-        });
-
-        const stationsWithDetails = await Promise.all(stationListPromises);
-
-        // Filter out null values
-        const validStations = stationsWithDetails.filter(station => station !== null);
-
-        setStationmarker(validStations);
-
-      } catch (error) {
-        console.error('Error fetching stations and status: ', error);
-      }
-      finally {
-            setLoading(false); // Hide loading indicator when data is loaded
-          }
-    };
-
-    fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
-  }, []);
-
-
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // ดึงข้อมูลจาก collection 'station_realair'
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         // Query เพื่อดึงสถานะล่าสุดจาก subcollection 'status'
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // เรียงตามสถานะล่าสุด
-  //           .limit(1) // จำกัดให้ดึงเพียง 1 document
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // แปลง status_datestamp ที่เป็น Firestore Timestamp ให้เป็น Date
-  //           const status_datestamp = status.status_datestamp.toDate();
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString() // แปลง Date เป็น string
-  //           };
-  //         });
-
-  //         // ตรวจสอบข้อมูลตำแหน่ง
-  //         const cordinates = stationData.station_codinates;
-
-  //         if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           latitude: cordinates.latitude,
-  //           longitude: cordinates.longitude,
-  //           status: statusData.length > 0 ? statusData[0] : null // ถ้ามีสถานะ ใช้ statusData[0]
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       // Filter out null values
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setStationmarker(validStations);
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // ซ่อน loading indicator เมื่อข้อมูลโหลดเสร็จ
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
-  // }, []);
-
-  // polygonColor
-
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // Fetch data from 'station_realair' collection
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         // Query to get the latest status from 'status' subcollection
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // Order by latest status
-  //           .limit(1) // Limit to 1 document
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // Convert status_datestamp from Firestore Timestamp to Date
-  //           const status_datestamp = status.status_datestamp.toDate();
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
-  //           };
-  //         });
-
-  //         // Verify coordinate data
-  //         const cordinates = stationData.station_codinates;
-
-  //         if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         // Generate polygon coordinates around the central point
-  //         const radiusInMeters = 400; // Define the radius for the polygon
-  //         const polygonCoordinates = generatePolygonCoordinates(cordinates, radiusInMeters);
-
-  //         // Ensure polygon coordinates are valid
-  //         if (!polygonCoordinates || polygonCoordinates.length === 0) {
-  //           console.error(`No valid coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           coordinates: polygonCoordinates,
-  //           status: statusData.length > 0 ? statusData[0] : null // Use latest status
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       // Filter out null values
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setStations(validStations);
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // Hide loading indicator when data is loaded
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // Call function on component mount
-  // }, []);
-
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc')
-  //           .limit(1)
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-  //           const status_datestamp = status.status_datestamp.toDate();
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString()
-  //           };
-  //         });
-
-  //         const coordinates = stationData.station_codinates;
-
-  //         if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         // Check if the station's coordinates fall within the specified polygon area
-  //         const isInsidePolygon = isPointInPolygon(coordinates, isoplethPolygonCoordinates2);
-
-  //         if (!isInsidePolygon) {
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           coordinates: coordinates,
-  //           status: statusData.length > 0 ? statusData[0] : null
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setStations(validStations);
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus();
-  // }, []);
-
-  // Determine the color based on status_pm
-
-  
-  
   const fetchStationsAndStatus = async (stationIds, setters) => {
     try {
+
       // Create an array of promises to fetch data for each station ID
       const fetchPromises = stationIds.map(async ({ id, setter }) => {
-        const stationCollection = await firestore().collection('station_realair').get();
+        // Fetch only 10 stations
+        const stationCollection = await firestore()
+          .collection('station_realair')
+          .limit(10) // Limit to 10 stations
+          .get();
+
+        // console.log('Fetched stationCollection:', stationCollection.docs.length);
 
         const stationListPromises = stationCollection.docs.map(async (doc) => {
           const stationData = doc.data();
+          // console.log(`Station data for ${doc.id}:`, stationData);
 
           const statusSnapshot = await firestore()
             .collection('station_realair')
-            .doc(id)
+            .doc(id)  // Make sure 'id' exists in station_realair collection
             .collection('status')
             .orderBy('status_datestamp', 'desc')
             .limit(1)
@@ -441,6 +103,8 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
           const statusData = statusSnapshot.docs.map(subDoc => {
             const status = subDoc.data();
             const status_datestamp = status.status_datestamp.toDate();
+            // console.log(`Status data for ${doc.id}:`, status);
+
             return {
               id: subDoc.id,
               ...status,
@@ -451,7 +115,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
           const coordinates = stationData.station_codinates;
 
           if (!coordinates || typeof coordinates.latitude === 'undefined' || typeof coordinates.longitude === 'undefined') {
-            console.error(`Invalid or missing coordinates for document ${doc.id}`);
+            // console.warn(`Invalid or missing coordinates for document ${doc.id}`);
             return null;
           }
 
@@ -467,61 +131,143 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
         const stationsWithDetails = await Promise.all(stationListPromises);
         const validStations = stationsWithDetails.filter(station => station !== null);
 
-        // Update the respective state
+        console.log('Valid stations:', validStations);
         setter(validStations);
       });
 
       await Promise.all(fetchPromises);
+      // console.log('All stations fetched successfully.');
     } catch (error) {
       console.error('Error fetching stations and status: ', error);
     } finally {
-      setLoading(false); // Hide loading indicator when data is loaded
+      setLoading(false);
     }
   };
+
+  const getColorBasedOnStatusPm = (statusPm) => {
+
+    if (statusPm < 15) return `rgba(2, 174, 238, 0.02)`;
+    if (statusPm >= 15 && statusPm < 25) return `rgba(50, 182, 72, 0.03)`;
+    if (statusPm >= 25 && statusPm < 38) return `rgba(253, 252, 1, 0.03)`;
+    if (statusPm >= 38 && statusPm < 70) return `rgba(243, 113, 53, 0.03)`;
+    return `rgba(236, 29, 37,0.03)`;
+  };
+
+  const getColorBased = (statusPm) => {
+
+    if (statusPm < 10) return `rgba(2, 174, 238, 0.1)`;
+    if (statusPm >= 10 && statusPm < 15) return `rgba(50, 182, 72, 0.1)`;
+    if (statusPm >= 15 && statusPm < 20) return `rgba(253, 252, 1, 0.1)`;
+    if (statusPm >= 20 && statusPm < 25) return `rgba(243, 113, 53, 0.1)`;
+    return `rgba(236, 29, 37,0.1)`;
+  };
+
+  const polygons = [
+    isoplethPolygonCoordinates3,
+    isoplethPolygonCoordinates4,
+    isoplethPolygonCoordinates5,
+    isoplethPolygonCoordinates6,
+    isoplethPolygonCoordinates7,
+    isoplethPolygonCoordinates8,
+    isoplethPolygonCoordinates9,
+    isoplethPolygonCoordinates10,
+    isoplethPolygonCoordinates11]; // 
+
+
 
   useEffect(() => {
     // Define the list of zone IDs and their respective state setters
     const stationIds = [
       { id: 'XXAmTY4YV5zDLtbCK0Z7', setter: setZonestatus1 },  // Zone 1
       { id: 'klx7b9neRfTaVJBSU82N', setter: setZonestatus2 },  // Zone 2
-      { id: 'FZaowBdWAO1LNpK3fG7U', setter: setZonestatus3 },  // Zone 3
-      { id: 'VZIJIRdEjjjlCEJCn1fi', setter: setZonestatus4 },  // Zone 4
-      { id: 'DnoaGJyS4B7kq3i9gduz', setter: setZonestatus4 },  // Zone 4
-      { id: '6SHNRZf1D1n7BcuAR4py', setter: setZonestatus5 },  // Zone 5
-      { id: 'L0gJJwgn8egnc5j3Z3QG', setter: setZonestatus6 },  // Zone 6
-      { id: 'gWI7GA7nv5zB8tGXNNRn', setter: setZonestatus7 },  // Zone 7
-      { id: 'hUcheViR4agNhkx4k8Pa', setter: setZonestatus8 },  // Zone 8
-      { id: 'CUxU9GTgcane7rKLTtMT', setter: setZonestatus9 },  // Zone 9
-      { id: 'EXb1fYqJtYk9yUZlJFIR', setter: setZonestatus10 }, // Zone 10
-      { id: 'fXgV3ELF2nA6l8wGi7If', setter: setZonestatus11 }  // Zone 11
     ];
 
     fetchStationsAndStatus(stationIds, [
-      setZonestatus1, setZonestatus2, setZonestatus3, setZonestatus4, setZonestatus5,
-      setZonestatus6, setZonestatus7, setZonestatus8, setZonestatus9, setZonestatus10, setZonestatus11
+      setZonestatus1, setZonestatus2,
     ]);
   }, []);
 
-  const getColorBasedOnStatusPm = (statusPm) => {
 
 
-    if (statusPm < 10) return `rgba(2, 174, 238, 0.01)`;
-    if (statusPm >= 10 && statusPm < 15) return `rgba(50, 182, 72, 0.01)`;
-    if (statusPm >= 15 && statusPm < 20) return `rgba(253, 252, 1, 0.01)`;
-    if (statusPm >= 20 && statusPm < 25) return `rgba(243, 113, 53, 0.01)`;
-    return `rgba(236, 29, 37,0.01)`;
+
+
+
+  const initialRegion = {
+    latitude: 14.881474,
+    longitude: 102.015555,
+    latitudeDelta: 0.04,
+    longitudeDelta: 0.04,
   };
 
+
+
+  const ModalIsoMapurl = ({ }) => {
+    return (
+      <View style={styles.containerbutton}>
+        <Button title="Show Map" onPress={openMap} style={styles.button} />
+
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          onRequestClose={closeMap}
+          animationType="slide"
+        >
+          <View style={styles.modalContainer}>
+            <Button title="Close" onPress={closeMap} />
+            <WebView
+              source={{ uri: 'https://streamlit-app-ke5w.onrender.com' }}
+              style={styles.webview}
+            />
+          </View>
+        </Modal>
+      </View>
+    );
+  }
+
+
+
+
+  //Loading
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (loading) {
+      // Define the animation sequence
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 1.2,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      // Stop the animation when not loading
+      Animated.timing(scaleAnim).stop();
+    }
+  }, [loading, scaleAnim]);
 
 
   if (loading) {
 
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <SafeAreaView style={styles.containerloading}>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Image
+            source={require('../../assest/images/Logo.png')}
+            style={styles.image}
+          />
+        </Animated.View>
       </SafeAreaView>
     );
   }
+
 
 
 
@@ -539,20 +285,7 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
         >
 
 
-          {stationmaker.map((station) => (
-            <Marker
-              key={station.id}
-              coordinate={{ latitude: station.latitude, longitude: station.longitude }}
-              title={station.station_name}
-              description={`Status PM: ${station.status ? station.status.status_pm : 'N/A'}`}
-              pinColor="red"
-              style={{
-                width: 10, height: 10 // Adjust scale factor as needed
-              }}
-            >
-            </Marker>
-          ))}
-
+          {/* Render markers or other components using stations data */}
 
 
           {zonestatus1.map(station => {
@@ -589,170 +322,54 @@ const Mapiso = ({ navigation, latitude, longitude }) => {
             return null;
           })}
 
-          {zonestatus3.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates3}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
+
+          {polygons.map((coordinates, index) => {
+            const randomStatusPm = getRandomStatusPm(); // สุ่มค่า status_pm สำหรับแต่ละ polygon
+            const fillColor = getColorBased(randomStatusPm); // หาสีตามค่า status_pm
+
+            return (
+              <Polygon
+                key={index}
+                coordinates={coordinates} // พิกัดที่ใช้วาด polygon
+                fillColor={fillColor} // สีของ polygon
+                strokeColor={fillColor} // สีเส้นขอบ
+                strokeWidth={1} // ความกว้างเส้นขอบ
+              />
+            );
           })}
-
-
-          {zonestatus4.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates4}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus5.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates5}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus6.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates6}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus7.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates7}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus8.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates8}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus9.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates9}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus10.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates10}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {zonestatus11.map(station => {
-            const { status } = station;
-            if (status) {
-              const color = getColorBasedOnStatusPm(status.status_pm);
-              return (
-                <Polygon
-                  key={station.id}
-                  coordinates={isoplethPolygonCoordinates11}
-                  strokeColor={color}
-                  fillColor={color}
-                  strokeWidth={0.2}
-                />
-              );
-            }
-            return null;
-          })}
-
-
-
-
-
-
-
-
-
 
         </MapView>
+
+        <View style={{ width: '90%', height: 80, backgroundColor: '#fff', borderRadius: 20, alignSelf: 'center', justifyContent: 'center', marginTop: 40 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center',marginTop:10 }}>
+            <View style={{ backgroundColor: colors.blue_volumn, width: '17%', height: 10 }}></View>
+            <View style={{ backgroundColor: colors.green_volumn, width: '19%', height: 10 }}></View>
+            <View style={{ backgroundColor: colors.yellow_volumn, width: '20%', height: 10 }}></View>
+            <View style={{ backgroundColor: colors.orange_volumn, width: '19%', height: 10 }}></View>
+            <View style={{ backgroundColor: colors.red_volnum, width: '17%', height: 10 }}></View>
+          </View>
+          <View style={{ flexDirection: 'row',justifyContent:'space-around',marginTop:5 }}>
+            <Text style={{fontSize:10, left:15 }} >0-15</Text>
+            <Text style={{fontSize:10,left:20}}>15-25</Text>
+            <Text style={{fontSize:10,left:20}}>25-37</Text>
+            <Text style={{fontSize:10,left:20}}>37-75</Text>
+            <Text style={{fontSize:10,left:5}}>More than 75</Text>
+          </View>
+          <View style={{ flexDirection: 'row',justifyContent:'space-around',marginTop:5 }}>
+            <Text style={{fontSize:10, left:10,}} >VeryGood</Text>
+            <Text style={{fontSize:10,}}>Good</Text>
+            <Text style={{fontSize:10,right:5}}>Medium</Text>
+            <Text style={{fontSize:10,right:10}}>Risky</Text>
+            <Text style={{fontSize:10, right:10}}>Danger</Text>
+          </View>
+
+        </View>
+
+
+        <ModalIsoMapurl />
+       
+        
+
 
       </View>
     </SafeAreaView >
@@ -768,10 +385,28 @@ const styles = StyleSheet.create({
     height: 400,
     width: 400,
     justifyContent: 'flex-end',
-    alignItems: 'center',
+    alignItems: 'flex-end'
+  },
+  containerbutton: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    bottom: 15, // ระยะห่างจากด้านล่าง
+    right: 10,  // ระยะห่างจากด้านขวา
+  },
+  button: {
+    position: 'absolute',
+    bottom: 40, // ระยะห่างจากด้านล่าง
+    right: 10,  // ระยะห่างจากด้านขวา
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  modalContainer: {
+    width: '90%', // ความกว้างของ modal
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
   },
   image: {
     width: 100,
@@ -785,9 +420,22 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
-  },
-});
+    width: '100%', // ใช้ความกว้างเต็มที่
+    height: '100%',
 
+  },
+  containerloading: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  animatedView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+});
 
 const isoplethPolygonCoordinates1 = [
   { latitude: 14.86829758, longitude: 102.0352928 },

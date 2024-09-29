@@ -1,18 +1,6 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  Image,
-  FlatList,
-  Pressable,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator
-} from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, SafeAreaView, StyleSheet, Text, Animated, Image, TextInput, ScrollView, TouchableOpacity, } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+
 // import firestore from '@react-native-firebase/firestore'
 
 import Feather from 'react-native-vector-icons/Feather'
@@ -57,7 +45,61 @@ const Listview = ({ navigation }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
 
+  const currentDate = new Date();
 
+  useEffect(() => {
+    const fetchStationsAndStatus = async () => {
+      try {
+        // Fetch data from 'station_realair' collection
+        const stationCollection = await firestore().collection('station_realair').get();
+
+        const stationListPromises = stationCollection.docs.map(async (doc) => {
+          const stationData = doc.data();
+
+          // Query to fetch the latest status from the 'status' subcollection
+          const statusSnapshot = await firestore()
+            .collection('station_realair')
+            .doc(doc.id)
+            .collection('status')
+            .orderBy('status_datestamp', 'desc') // Order by the latest status
+            .limit(1) // Limit to 1 document
+            .get();
+
+          const statusData = statusSnapshot.docs.map(subDoc => {
+            const status = subDoc.data();
+
+            // Convert status_datestamp from Firestore Timestamp to Date
+            const status_datestamp = status.status_datestamp.toDate();
+
+            return {
+              id: subDoc.id,
+              ...status,
+              status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
+            };
+          });
+
+          return {
+            id: doc.id,
+            station_name: stationData.station_name,
+            station_codinates: stationData.station_codinates || {}, // Fetch station_codinates (default to empty object if not present)
+            status: statusData.length > 0 ? statusData[0] : null // If there is status, use statusData[0]
+          };
+        });
+
+        const stationsWithDetails = await Promise.all(stationListPromises);
+
+        setStations(stationsWithDetails);
+        setFilteredStations(stationsWithDetails);
+
+      } catch (error) {
+        console.error('Error fetching stations and status: ', error);
+      } finally {
+        setLoading(false); // Hide loading indicator when data is loaded
+      }
+    };
+
+    fetchStationsAndStatus(); // Call the function when component mounts
+  }, []);
 
 
 
@@ -125,77 +167,35 @@ const Listview = ({ navigation }) => {
     setStations(sorted);
   };
 
+  // const handleSearch = (text) => {
+  //   setSearchQuery(text);
+  //   const filtered = stations.filter(station => {
+  //     const stationName = station.station_name?.toLowerCase() || '';
+  //     const statusDate = station.status?.status_date || '';
+
+  //     return (
+  //       stationName.includes(text.toLowerCase()) ||
+  //       statusDate.includes(text)
+  //     );
+  //   });
+  //   setStations(filtered);
+  // };
   const handleSearch = (text) => {
     setSearchQuery(text);
+
     const filtered = stations.filter(station => {
       const stationName = station.station_name?.toLowerCase() || '';
       const statusDate = station.status?.status_date || '';
 
+      // Convert both the search text and station name/status date to lowercase for case-insensitive comparison
       return (
         stationName.includes(text.toLowerCase()) ||
         statusDate.includes(text)
       );
     });
+
     setStations(filtered);
   };
-
-  // fecth Data
-
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // ดึงข้อมูล collection 'station_realair'
-  //       const stationCollection = await firestore().collection('station_realair').get();
-
-  //       // ใช้ Promise.all เพื่อรอการดึงข้อมูลสถานีและสถานะจาก subcollection
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         // Query เพื่อดึงสถานะล่าสุดจาก subcollection 'status'
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // เรียงตามวันที่สถานะล่าสุด
-  //           .limit(1) // จำกัดให้ดึงเพียง 1 document
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // แปลง status_datestamp ที่เป็น Firestore Timestamp ให้เป็น Date
-  //           const status_datestamp = status.status_datestamp.toDate(); 
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp // คืนค่าเป็น Date หรือแปลงเป็น string ตามต้องการ
-  //           };
-  //         });
-
-  //         // ถ้ามีสถานะล่าสุด ให้เพิ่มสถานะลงในสถานี
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           status: statusData.length > 0 ? statusData[0] : null // ถ้ามีสถานะ ใช้ statusData[0]
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       // อัปเดตสถานีที่ดึงมาใน state
-  //       setStations(stationsWithDetails);
-
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // ซ่อน loading indicator เมื่อข้อมูลโหลดเสร็จ
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
-  // }, []);
 
   const fetchStationsAndStatus = async () => {
     try {
@@ -237,124 +237,49 @@ const Listview = ({ navigation }) => {
   };
 
 
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // ดึงข้อมูลจาก collection 'station_realair'
-  //       const stationCollection = await firestore().collection('station_realair').get();
 
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
 
-  //         // Query เพื่อดึงสถานะล่าสุดจาก subcollection 'status'
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // เรียงตามสถานะล่าสุด
-  //           .limit(1) // จำกัดให้ดึงเพียง 1 document
-  //           .get();
 
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // แปลง status_datestamp ที่เป็น Firestore Timestamp ให้เป็น Date
-  //           const status_datestamp = status.status_datestamp.toDate();
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString() // แปลง Date เป็น string
-  //           };
-  //         });
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           status: statusData.length > 0 ? statusData[0] : null // ถ้ามีสถานะ ใช้ statusData[0]
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       setStations(stationsWithDetails);
-  //       setFilteredStations(stationsWithDetails);
-  //       console.log("check", stations)
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // ซ่อน loading indicator เมื่อข้อมูลโหลดเสร็จ
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // เรียกฟังก์ชันเมื่อ component ทำการ mount
-  // }, []);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const fetchStationsAndStatus = async () => {
-      try {
-        // Fetch data from 'station_realair' collection
-        const stationCollection = await firestore().collection('station_realair').get();
-
-        const stationListPromises = stationCollection.docs.map(async (doc) => {
-          const stationData = doc.data();
-
-          // Query to fetch the latest status from the 'status' subcollection
-          const statusSnapshot = await firestore()
-            .collection('station_realair')
-            .doc(doc.id)
-            .collection('status')
-            .orderBy('status_datestamp', 'desc') // Order by the latest status
-            .limit(1) // Limit to 1 document
-            .get();
-
-          const statusData = statusSnapshot.docs.map(subDoc => {
-            const status = subDoc.data();
-
-            // Convert status_datestamp from Firestore Timestamp to Date
-            const status_datestamp = status.status_datestamp.toDate();
-
-            return {
-              id: subDoc.id,
-              ...status,
-              status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
-            };
-          });
-
-          return {
-            id: doc.id,
-            station_name: stationData.station_name,
-            station_codinates: stationData.station_codinates || {}, // Fetch station_codinates (default to empty object if not present)
-            status: statusData.length > 0 ? statusData[0] : null // If there is status, use statusData[0]
-          };
-        });
-
-        const stationsWithDetails = await Promise.all(stationListPromises);
-
-        setStations(stationsWithDetails);
-        setFilteredStations(stationsWithDetails);
-
-      } catch (error) {
-        console.error('Error fetching stations and status: ', error);
-      } finally {
-        setLoading(false); // Hide loading indicator when data is loaded
-      }
-    };
-
-    fetchStationsAndStatus(); // Call the function when component mounts
-  }, []);
-
+    if (loading) {
+      // Define the animation sequence
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 1.2,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      // Stop the animation when not loading
+      Animated.timing(scaleAnim).stop();
+    }
+  }, [loading, scaleAnim]);
 
 
   if (loading) {
-
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <SafeAreaView style={styles.containerloading}>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Image
+            source={require('../../assest/images/Logo.png')}
+            style={styles.image}
+          />
+        </Animated.View>
       </SafeAreaView>
     );
   }
+
+
 
 
 
@@ -367,7 +292,7 @@ const Listview = ({ navigation }) => {
         <View style={{ height: 80, width: '100%', flexDirection: "row", marginTop: 20, padding: 20, justifyContent: 'flex-start' }}>
 
           {/* SearBar */}
-          <View style={{ height: 50, width: '80%', backgroundColor: colors.white, borderRadius: 20, padding: 10, flexDirection: 'row', justifyContent: 'flex-start', }}>
+          <View style={{ height: 50, width: '100%', backgroundColor: colors.white, borderRadius: 20, padding: 10, flexDirection: 'row', justifyContent: 'flex-start', }}>
 
             <Feather
               name={"search"}
@@ -375,14 +300,14 @@ const Listview = ({ navigation }) => {
               color={colors.bluemeduim}
               style={{ alignSelf: 'center' }}
             />
-            <TextInput style={{ flex: 1, height: 40, bottom: 4 }}
+            <TextInput style={{ flex: 1, hei1sght: 40, bottom: 4 }}
               value={searchQuery}
               onChangeText={handleSearch}
             />
 
           </View>
 
-          <TouchableOpacity style={{ height: 50, width: 60, backgroundColor: colors.white, borderRadius: 20, marginLeft: 3, justifyContent: 'center' }}
+          {/* <TouchableOpacity style={{ height: 50, width: 60, backgroundColor: colors.white, borderRadius: 20, marginLeft: 3, justifyContent: 'center' }}
             onPress={() => setIsFilterVisible(!isFilterVisible)}
           >
 
@@ -392,7 +317,7 @@ const Listview = ({ navigation }) => {
               color={colors.bluemeduim}
               style={{ alignSelf: 'center' }}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
         </View>
 
@@ -444,12 +369,12 @@ const Listview = ({ navigation }) => {
                       flexDirection: 'row',
                       borderRadius: 20
                     }}
-                    onPress={() => navigation.navigate('Details', { stations:item })}
+                    onPress={() => navigation.navigate('Details', { stations: item })}
                   >
 
                     {/* NameSpace */}
                     <View style={{ backgroundColor: colors.blueheavy, borderTopLeftRadius: 20, borderBottomLeftRadius: 20, width: '35%', height: '100%', justifyContent: 'center', alignItems: 'center', borderRightColor: '#fff', borderRightWidth: 5, }}>
-                      <Text style={{ color: colors.white, alignSelf: 'center', fontWeight: 'bold', fontSize: 20, }} >
+                      <Text style={{ color: colors.white, alignSelf: 'center', fontWeight: 'bold', fontSize: 16, }} >
                         {item.station_name || 'Unknown'}
                       </Text>
                     </View>
@@ -473,8 +398,8 @@ const Listview = ({ navigation }) => {
                             />
                           </View>
 
-                          <Text style={{ color: colors.white, marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 180, alignSelf: 'center', left: 5 }}>
-                            {item.status.status_datestamp}
+                          <Text style={{ color: colors.white, marginTop: 2, fontWeight: 'bold', fontSize: 12, width: 150, alignSelf: 'center', left: 15 }}>
+                            {currentDate.toLocaleDateString()} {currentDate.toLocaleTimeString()} 
                           </Text>
                         </View>
 
@@ -486,7 +411,7 @@ const Listview = ({ navigation }) => {
                             color={colors.white}
                             style={{ alignSelf: 'center' }}
                           />
-                          <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 20 }}>
+                          <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 12, width: 20 }}>
                             {item.status.status_pm || 'not found'}
                           </Text>
                         </View>
@@ -538,4 +463,20 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
   },
+  containerloading: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  animatedView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+
 });

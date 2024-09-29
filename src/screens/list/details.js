@@ -1,4 +1,4 @@
-import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView,  ActivityIndicator } from 'react-native'
+import { View, SafeAreaView, StyleSheet, Text, TouchableOpacity, Animated, Easing, Dimensions, ScrollView, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useRef, useRoute } from 'react'
 
 import MapView, { PROVIDER_GOOGLE, Marker, Heatmap, Polygon, Polyline, Circle } from 'react-native-maps';
@@ -23,7 +23,7 @@ const { width, height } = Dimensions.get('screen');
 
 
 import { firebase, firestore } from '../db/config'
-import { addDays, format } from 'date-fns'; // ใช้ date-fns เพื่อจัดการวันที่
+import { addDays, format, startOfDay, endOfDay, eachHourOfInterval } from 'date-fns'; // ใช้ date-fns เพื่อจัดการวันที่
 
 
 
@@ -34,11 +34,7 @@ import { addDays, format } from 'date-fns'; // ใช้ date-fns เพื่�
  */
 
 
-
-
-
-
- const getMapRegion = (stations) => {
+const getMapRegion = (stations) => {
   if (stations.length === 0) return null;
 
   const latitudes = stations.map(station => station.latitude);
@@ -67,13 +63,33 @@ import { addDays, format } from 'date-fns'; // ใช้ date-fns เพื่�
   };
 };
 
+const getColorBasedOnStatusPm = (statusPm) => {
+  if (statusPm < 15) return 'rgba(2, 174, 238, 0.8)'; // Blue for Very Good
+  if (statusPm >= 15 && statusPm < 25) return 'rgba(50, 182, 72, 0.8)'; // Green for Good
+  if (statusPm >= 25 && statusPm < 38) return 'rgba(253, 252, 1, 0.8)'; // Yellow for Moderate
+  if (statusPm >= 38 && statusPm < 70) return 'rgba(243, 113, 53, 0.8)'; // Orange for Unhealthy
+  return 'rgba(236, 29, 37, 0.8)'; // Red for Very Unhealthy
+};
+
 const Details = ({ route }) => {
 
   const { stations } = route.params;
 
+  
+
+
+  const [statusPm, setStatusPm] = useState(0);
+  const [backgroundColor, setBackgroundColor] = useState('rgba(255, 255, 255, 1)');
+
+  const currentDate = new Date();
+
 
   const [lineData1, setLinedata1] = useState([])
+
   const [linedata2, setLinedata2] = useState(new Array(30).fill(0));
+  
+  const [mostRecentTime, setMostRecentTime] = useState('');
+
 
   const [statusPoly, setStatusPoly] = useState([])
   const [stationmaker, setStationmarker] = useState([])
@@ -92,22 +108,24 @@ const Details = ({ route }) => {
   const labels_month = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
 
   const [label_dy, setLabels] = useState([]);
+  const [label_ty, setLabety] = useState([]);
 
-  const chartData = {
-    labels: labels,
+
+  const chartData1 = {
+    labels: label_dy,
     datasets: [
       {
-        data: lineData1, // Your data for 7 days
+        data: linedata2, // Your data for 7 days
         strokeWidth: 2, // optional
       },
     ],
   };
 
   const chartData2 = {
-    labels: label_dy,
+    labels: label_ty,
     datasets: [
       {
-        data: lineData1, // Your data for 30 days
+        data: linedata2, // Your data for 30 days
         strokeWidth: 2, // Optional
       },
     ],
@@ -129,13 +147,6 @@ const Details = ({ route }) => {
     inputRange: [0, 1],
     outputRange: ['0%', '80%'] // Change these percentages based on your layout requirements
   });
-
-
-  useEffect(() => {
-    const newRegion = getMapRegion(stationmaker);
-    setRegion(newRegion);
-  }, [stationmaker]);
-
   //get data details 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -285,6 +296,13 @@ const Details = ({ route }) => {
   //   fetchData();
   // }, [stations]);
 
+
+  useEffect(() => {
+    const newRegion = getMapRegion(stationmaker);
+    setRegion(newRegion);
+  }, [stationmaker]);
+
+  // time hour
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -306,30 +324,58 @@ const Details = ({ route }) => {
           .orderBy('status_datestamp', 'desc')
           .get();
 
-        let aggregatedData = [];
+        if (subcollectionSnapshot.empty) {
+          console.warn('No data found for the specified date range');
+          return;
+        }
 
-        subcollectionSnapshot.docs.forEach((subDoc) => {
+        // Get the most recent date from the documents
+        const mostRecentDate = subcollectionSnapshot.docs[0].data().status_datestamp.toDate();
+        const startOfCurrentDay = startOfDay(mostRecentDate);
+        const endOfCurrentDay = endOfDay(mostRecentDate);
+
+        // Fetch data only for the most recent date
+        const recentDaySnapshot = await stationDocRef
+          .collection('status')
+          .where('status_datestamp', '>=', startOfCurrentDay)
+          .where('status_datestamp', '<=', endOfCurrentDay)
+          .orderBy('status_datestamp', 'asc')
+          .get();
+
+        if (recentDaySnapshot.empty) {
+          console.warn('No data found for the most recent date');
+          return;
+        }
+
+        let hourlyData = {};
+
+        recentDaySnapshot.docs.forEach((subDoc) => {
           const subDocData = subDoc.data();
           if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
-            aggregatedData.push({
-              date: subDocData.status_datestamp.toDate(),
-              pmValue: subDocData.status_pm,
-            });
+            const date = subDocData.status_datestamp.toDate();
+            const hour = format(date, 'HH:mm'); // Use HH:mm to show hour and minute
+
+            if (!hourlyData[hour]) {
+              hourlyData[hour] = [];
+            }
+            hourlyData[hour].push(subDocData.status_pm);
           }
         });
 
-        if (aggregatedData.length === 0) {
-          aggregatedData = [{ date: currentDate, pmValue: 0 }];
-        }
+        // Generate hourly labels and data
+        const hours = Object.keys(hourlyData).sort(); // Sort hours in ascending order
+        const formattedLabels = hours;
+        const formattedData = hours.map(hour => {
+          const values = hourlyData[hour] || [];
+          if (values.length === 0) return 0; // If no data for the hour, return 0
+          return values.reduce((sum, value) => sum + value, 0) / values.length; // Average PM2.5
+        });
 
-        // Format the date to show only day and month
-        const formattedLabels = aggregatedData.map(item =>
-          item.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
-        );
-        const formattedData = aggregatedData.map(item => item.pmValue);
+        setLabety(formattedLabels);
+        setLinedata2(formattedData);
 
-        setLabels(formattedLabels);
-        setLinedata1(formattedData);
+        // Show the most recent date in 'dd MMM' format if needed
+        setMostRecentTime(format(mostRecentDate, 'dd MMM'));
 
       } catch (error) {
         console.error('Error fetching Firestore data:', error);
@@ -338,80 +384,90 @@ const Details = ({ route }) => {
 
     fetchData();
   }, [stations]);
+  //date 7 day
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!stations || !stations.id) {
+          console.error('No station ID found in route parameters');
+          return;
+        }
+  
+        const stationDocRef = firestore()
+          .collection('station_realair')
+          .doc(stations.id);
+  
+        const currentDate = new Date();
+        const sevenDaysAgo = addDays(currentDate, -7);
+  
+        const subcollectionSnapshot = await stationDocRef
+          .collection('status')
+          .where('status_datestamp', '>=', sevenDaysAgo)
+          .orderBy('status_datestamp', 'desc')
+          .get();
+  
+        if (subcollectionSnapshot.empty) {
+          console.warn('No data found for the specified date range');
+          return;
+        }
+  
+        // Get the most recent date from the documents
+        const mostRecentDate = subcollectionSnapshot.docs[0].data().status_datestamp.toDate();
+        const startOfCurrentDay = startOfDay(mostRecentDate);
+        const endOfCurrentDay = endOfDay(mostRecentDate);
+  
+        // Fetch data only for the past week
+        const recentWeekSnapshot = await stationDocRef
+          .collection('status')
+          .where('status_datestamp', '>=', sevenDaysAgo)
+          .where('status_datestamp', '<=', endOfCurrentDay)
+          .orderBy('status_datestamp', 'asc')
+          .get();
+  
+        if (recentWeekSnapshot.empty) {
+          console.warn('No data found for the specified date range');
+          return;
+        }
+  
+        let dailyData = {};
+  
+        recentWeekSnapshot.docs.forEach((subDoc) => {
+          const subDocData = subDoc.data();
+          if (subDocData.status_pm !== undefined && typeof subDocData.status_pm === 'number') {
+            const date = subDocData.status_datestamp.toDate();
+            const day = format(date, 'yyyy-MM-dd'); // Group by day
+  
+            if (!dailyData[day]) {
+              dailyData[day] = [];
+            }
+            dailyData[day].push(subDocData.status_pm);
+          }
+        });
+  
+        // Generate daily labels and data
+        const days = Object.keys(dailyData).sort(); // Sort days in ascending order
+        const formattedLabels = days.map(day => format(new Date(day), 'dd MMM')); // Format to 'dd MMM'
+        const formattedData = days.map(day => {
+          const values = dailyData[day] || [];
+          if (values.length === 0) return 0; // If no data for the day, return 0
+          return values.reduce((sum, value) => sum + value, 0) / values.length; // Average PM2.5
+        });
+  
+        setLabels(formattedLabels);
+        setLinedata1(formattedData);
+  
+        // Show the most recent date in 'dd MMM' format if needed
+        setMostRecentTime(format(mostRecentDate, 'dd MMM'));
+  
+      } catch (error) {
+        console.error('Error fetching Firestore data:', error);
+      }
+    };
+  
+    fetchData();
+  }, [stations]);
 
-  // useEffect(() => {
-  //   const fetchStationsAndStatus = async () => {
-  //     try {
-  //       // Fetch data from 'station_realair' collection
-  //       const stationCollection = await firestore().collection('station_realair').get();
 
-  //       const stationListPromises = stationCollection.docs.map(async (doc) => {
-  //         const stationData = doc.data();
-
-  //         // Query to get the latest status from 'status' subcollection
-  //         const statusSnapshot = await firestore()
-  //           .collection('station_realair')
-  //           .doc(doc.id)
-  //           .collection('status')
-  //           .orderBy('status_datestamp', 'desc') // Order by latest status
-  //           .limit(1) // Limit to 1 document
-  //           .get();
-
-  //         const statusData = statusSnapshot.docs.map(subDoc => {
-  //           const status = subDoc.data();
-
-  //           // Convert status_datestamp from Firestore Timestamp to Date
-  //           const status_datestamp = status.status_datestamp.toDate();
-
-  //           return {
-  //             id: subDoc.id,
-  //             ...status,
-  //             status_datestamp: status_datestamp.toLocaleString() // Convert Date to string
-  //           };
-  //         });
-
-  //         // Verify coordinate data
-  //         const cordinates = stationData.station_codinates;
-
-  //         if (!cordinates || typeof cordinates.latitude === 'undefined' || typeof cordinates.longitude === 'undefined') {
-  //           console.error(`Invalid or missing coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         // Generate polygon coordinates around the central point
-  //         const radiusInMeters = 400; // Define the radius for the polygon
-  //         const polygonCoordinates = generatePolygonCoordinates(cordinates, radiusInMeters);
-
-  //         // Ensure polygon coordinates are valid
-  //         if (!polygonCoordinates || polygonCoordinates.length === 0) {
-  //           console.error(`No valid coordinates for document ${doc.id}`);
-  //           return null;
-  //         }
-
-  //         return {
-  //           id: doc.id,
-  //           station_name: stationData.station_name,
-  //           coordinates: polygonCoordinates,
-  //           status: statusData.length > 0 ? statusData[0] : null // Use latest status
-  //         };
-  //       });
-
-  //       const stationsWithDetails = await Promise.all(stationListPromises);
-
-  //       // Filter out null values
-  //       const validStations = stationsWithDetails.filter(station => station !== null);
-
-  //       setStatusPoly(validStations);
-
-  //     } catch (error) {
-  //       console.error('Error fetching stations and status: ', error);
-  //     } finally {
-  //       setLoading(false); // Hide loading indicator when data is loaded
-  //     }
-  //   };
-
-  //   fetchStationsAndStatus(); // Call function on component mount
-  // }, [stations]);
 
   useEffect(() => {
     const fetchStationAndStatus = async () => {
@@ -559,6 +615,41 @@ const Details = ({ route }) => {
     fetchStationAndStatus();
   }, [stations]);
 
+  useEffect(() => {
+    const fetchStationAndStatus = async () => {
+      try {
+        if (!stations || !stations.id) {
+          console.error('No station ID found in route parameters');
+          return;
+        }
+
+        const stationDocRef = firestore().collection('station_realair').doc(stations.id);
+        const statusSnapshot = await stationDocRef
+          .collection('status')
+          .orderBy('status_datestamp', 'desc')
+          .limit(1)
+          .get();
+
+        if (!statusSnapshot.empty) {
+          const latestStatus = statusSnapshot.docs[0].data();
+          const latestStatusPm = latestStatus.status_pm;
+
+          // Set status_pm and the corresponding background color
+          setStatusPm(latestStatusPm);
+          setBackgroundColor(getColorBasedOnStatusPm(latestStatusPm));
+        } else {
+          console.error('No status data found for station');
+        }
+      } catch (error) {
+        console.error('Error fetching station and status: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStationAndStatus();
+  }, [stations]);
+
   function generatePolygonCoordinates(center, radiusInMeters, numPoints = 6) {
     const coordinates = [];
     const angleStep = (2 * Math.PI) / numPoints;
@@ -582,68 +673,16 @@ const Details = ({ route }) => {
   }
 
 
-
-
   const Modalpopup = ({ navigation, navigate, props }) => {
     return (
       <View style={{ padding: 5, flex: 1 }}>
         <View style={{ width: '100%', height: 80, flexDirection: 'row', }}>
 
           <View style={{ width: '35%', height: '100%', alignItems: 'center', }}>
-            <Text key={stations.id} style={{ alignSelf: 'center', fontSize: 20, fontWeight: 'bold', color: colors.white, width: 100 }}>
+            <Text key={stations.id} style={{ alignSelf: 'center', fontSize: 16, fontWeight: 'bold', color: colors.white, width: 100 }}>
               {stations.station_name || 'Unknown'}
             </Text>
           </View>
-
-
-
-          {/* 
-          {stations.status && stations.status.length > 0 && (
-            stations.status.map((status, index) => (
-              <View key={index} style={{ width: '60%', height: '100%', alignItems: 'center', justifyContent: 'space-around', flexDirection: 'row' }}>
-
-                <View style={{ height: 70, width: 70, alignSelf: 'center', borderRightColor: '#fff', borderRightWidth: 5, }}>
-                  <Feather
-                    name={"calendar"}
-                    size={40}
-                    color={colors.white}
-                    style={{ alignSelf: 'center', right: 5 }}
-                  />
-
-                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 70, right: 5 }}>
-                    {status.status_date || 'Unknown'}
-                  </Text>
-                </View>
-
-                <View style={{ height: 70, width: 70, alignSelf: 'center', left: 2, borderRightColor: '#fff', borderRightWidth: 5, }}>
-                  <Feather
-                    name={"clock"}
-                    size={40}
-                    color={colors.white}
-                    style={{ alignSelf: 'center', right: 5 }}
-                  />
-                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, right: 5 }}>
-                    {status.status_time || 'Unknown'}
-                  </Text>
-                </View>
-
-                <View style={{ height: 70, width: 40, alignSelf: 'center', left: 4, }}>
-                  <Feather
-                    name={"cloud"}
-                    size={40}
-                    color={colors.white}
-                    style={{ alignSelf: 'center' }}
-                  />
-                  <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16 }}>
-                    {status.status_pm || 'Unknown'}
-                  </Text>
-
-                </View>
-
-              </View>
-            ))
-          )} */}
-
 
 
           {stations.status && (
@@ -666,8 +705,8 @@ const Details = ({ route }) => {
                   />
                 </View>
 
-                <Text style={{ color: colors.white, marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 180, alignSelf: 'center', left: 5 }}>
-                  {stations.status.status_datestamp}
+                <Text style={{ color: colors.white, marginTop: 2, fontWeight: 'bold', fontSize: 12, width: 130, alignSelf: 'center', left: 5 }}>
+                  {currentDate.toLocaleDateString()} {currentDate.toLocaleTimeString()} {/* แสดงวันที่และเวลา */}
                 </Text>
               </View>
 
@@ -679,7 +718,7 @@ const Details = ({ route }) => {
                   color={colors.white}
                   style={{ alignSelf: 'center' }}
                 />
-                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 16, width: 20 }}>
+                <Text style={{ color: colors.white, alignSelf: 'center', marginTop: 2, fontWeight: 'bold', fontSize: 12, width: 20 }}>
                   {stations.status.status_pm || 'not found'}
                 </Text>
               </View>
@@ -700,29 +739,34 @@ const Details = ({ route }) => {
 
       <View style={{ width: '100%', height: 80, top: 100 }}>
 
-        <LineChart
-          style={{ alignSelf: 'center', borderRadius: 20 }}
-          data={chartData}
-          width={width * 90 / 100}
-          height={180}
-          borderRadius={20}
-          chartConfig={chartConfig}
+       
+          <LineChart
+            style={{ alignSelf: 'center', borderRadius: 20 }}
+            data={chartData1}
+            width={width * 90 / 100}
+            height={180}
+            borderRadius={20}
+            chartConfig={chartConfig}
+          />
+      
 
-        />
 
         <LineChart
           style={{ alignSelf: 'center', borderRadius: 20, marginTop: 10 }}
           data={chartData2}
           width={width * 90 / 100}
           height={180}
+          borderRadius={20}
           chartConfig={chartConfig}
-          line
         />
 
       </View>
 
     );
   }
+
+
+
 
   if (loading) {
 
@@ -770,10 +814,10 @@ const Details = ({ route }) => {
               strokeColor="#000" // สีขอบของ Polygon
               fillColor={
                 station.status ?
-                  (station.status.status_pm < 10 ? 'rgba(2, 174, 238, 0.5)' : // ฟ้า (PM < 10)
-                    station.status.status_pm >= 10 && station.status.status_pm < 15 ? 'rgba(50, 182, 72, 0.5)' : // เขียว (10 <= PM < 15)
-                      station.status.status_pm >= 15 && station.status.status_pm < 20 ? 'rgba(253, 252, 1, 0.5)' : // เหลือง (15 <= PM < 20)
-                        station.status.status_pm >= 20 && station.status.status_pm < 25 ? 'rgba(243, 113, 53, 0.5)' : // ส้ม (20 <= PM < 25)
+                  (station.status.status_pm < 15 ? 'rgba(2, 174, 238, 0.5)' : // ฟ้า (PM < 10)
+                    station.status.status_pm >= 15 && station.status.status_pm < 25 ? 'rgba(50, 182, 72, 0.5)' : // เขียว (10 <= PM < 15)
+                      station.status.status_pm >= 25 && station.status.status_pm < 38 ? 'rgba(253, 252, 1, 0.5)' : // เหลือง (15 <= PM < 20)
+                        station.status.status_pm >= 38 && station.status.status_pm < 70 ? 'rgba(243, 113, 53, 0.5)' : // ส้ม (20 <= PM < 25)
                           'rgba(236, 29, 37, 0.5)') // แดง (PM >= 25)
                   : 'gray' // หากไม่มีข้อมูล PM ให้แสดงสีเทาon.status.status_pm > 10 ? '#02AEEE' : 'gray')
 
@@ -788,6 +832,16 @@ const Details = ({ route }) => {
 
         </MapView>
 
+        <View style={{ width: '40%', height: 60, backgroundColor: '#fff', borderRadius: 20, alignSelf: 'center', justifyContent: 'center', marginTop: 40 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Apply the dynamically generated background color */}
+            <View style={{ backgroundColor: backgroundColor, width: 40, height: 40, borderRadius: 20,}}></View>
+            <Text style={{ fontSize: 10, left: 10 }}>
+              {/* Display status label based on status_pm */}
+              {statusPm < 15 ? 'Very Good' : statusPm < 25 ? 'Good' : statusPm < 38 ? 'Medium' : statusPm < 70 ? 'Risky' : 'Very Unhealthy'}
+            </Text>
+          </View>
+        </View>
 
 
 
